@@ -4,7 +4,7 @@ form{
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    height: 40%;
+    height: auto;
 }
 
 .btn{
@@ -28,4 +28,8 @@ form{
 }
 body{
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
 }

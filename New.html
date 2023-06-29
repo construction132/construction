@@ -11,24 +11,39 @@
         <a href="action.html" class="btn">Cash in /Cash out</a>
         <a href="statment.html" class="btn">Statment</a>
     </div>
+    <h1>select an option</h1>
+    <div>
+        <button id="create">create project</button>
+        <button id="delete">delete project</button>
+    </div>
+    <br><br>
 
-    <form action="" id="form">
+    <form action="" id="form" style="display: none;">
         <label for="">project name</label>
         <input type="text" id="projectName" placeholder="This project is by the name of whom">
-
+        <br>
         <label for="">Umi starting loan</label>
         <input type="number" id="aishaLoan" placeholder="Starting loan">
-
+        <br>
 
         <label for="">Abaa starting loan</label>
         <input type="number" id="abaaLoan" placeholder="Starting loan">
-
+        <br>
         <label for="">Starting date</label>
         <input type="date" id="date">
         <br>
         <button id="Submit">Submit</button>
 
     </form>
+
+    <form action="" id="form2" style="display: none;">
+        <label for="">project name</label>
+        <input type="text" id="projectName2" placeholder="This project is by the name of whom">
+        <br>
+        <button id="Submit2">Submit</button>
+
+    </form>
+
 
 
     <script>
@@ -44,6 +59,18 @@
             //locate the user to the path
             window.location = `./${path}`;
         })
+
+
+        //display forms
+        document.getElementById("create").addEventListener("click", () => {
+            document.getElementById("form").style.display = "flex";
+            document.getElementById("form2").style.display = "none";
+        })
+        document.getElementById("delete").addEventListener("click", () => {
+            document.getElementById("form2").style.display = "flex";
+            document.getElementById("form").style.display = "none";
+        })
+
 
 
 
@@ -87,7 +114,31 @@
                 alert(message)
                 return
             })
+
         })
+
+        document.getElementById("Submit2").addEventListener("click", () => {
+            event.preventDefault();
+
+            let project = ""
+            if (document.getElementById("projectName2").value == null) {
+                alert("project name connot be empty")
+                return
+            }
+
+            else
+                project = document.getElementById("projectName2").value
+
+            socket.emit("removeProject", project)
+            socket.once("projectRespones", (message) => {
+
+                alert(message)
+                return
+            })
+
+        })
+
+
     </script>
 </body>
 
