@@ -6,18 +6,27 @@
 </head>
 
 <body>
+    <div class="header">
+        <a href="New.html" class="btn">project</a>
+        <a href="action.html" class="btn">Cash in /Cash out</a>
+        <a href="statment.html" class="btn">Statment</a>
+    </div>
 
     <form action="" id="form">
         <label for="">project name</label>
-        <input type="text"  id="projectName" placeholder="This project is by the name of whom">
+        <input type="text" id="projectName" placeholder="This project is by the name of whom">
 
-        <br>
         <label for="">Umi starting loan</label>
-        <input type="text"  id="aishaLoan" placeholder="Starting loan">
-        
-        <br>
+        <input type="number" id="aishaLoan" placeholder="Starting loan">
+
+
         <label for="">Abaa starting loan</label>
-        <input type="text"  id="abaaLoan" placeholder="Starting loan">
+        <input type="number" id="abaaLoan" placeholder="Starting loan">
+
+        <label for="">Starting date</label>
+        <input type="date" id="date">
+        <br>
+        <button id="Submit">Submit</button>
 
     </form>
 
@@ -34,6 +43,50 @@
         socket.on("goLogin", (path) => {
             //locate the user to the path
             window.location = `./${path}`;
+        })
+
+
+
+        //getting the values
+        document.getElementById("Submit").addEventListener("click", () => {
+
+            event.preventDefault()
+            let abaaLoan = 0
+            let umiLoan = 0
+            let projectname = ""
+            let date = ""
+
+
+            let abaa = document.getElementById("abaaLoan").value
+            let umi = document.getElementById("aishaLoan").value
+            let project = document.getElementById("projectName").value
+            let datee = document.getElementById("date").value
+
+            if (abaa != null)
+                abaaLoan = abaa
+            if (umi != null)
+                umiLoan = umi
+            if (project != null)
+                projectname = project
+            else {
+                alert("project name cannot be empty")
+                return;
+            }
+            if (datee != null)
+                date = datee
+            else {
+                alert("date cannot be empty")
+                return;
+            }
+
+
+            console.log("will store")
+            socket.emit("storeProject", { abaaLoan, umiLoan, projectname, date })
+            socket.once("projectRespones", (message) => {
+
+                alert(message)
+                return
+            })
         })
     </script>
 </body>
