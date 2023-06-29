@@ -136,6 +136,19 @@ io.on("connection", (socket) => {
 
         }
     })
+
+    socket.on("removeProject", async(projectname) => {
+
+        //remove from the project collection the project of the specifc projectname
+        let deletee=await Project.deleteOne({ project:projectname })
+        console.log(deletee)
+        //if print if there was a project has been deleted or no 
+        if(deletee.deletedCount==0)
+            socket.emit("projectRespones","nothing has been deleted")
+        else
+            socket.emit("projectRespones","the project has beed removed successfully")
+
+    })
     //socket on client disconnect
     socket.on("disconnect", () => {
 
