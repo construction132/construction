@@ -1,0 +1,41 @@
+<html>
+
+<head>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+
+<body>
+
+    <form action="" id="form">
+        <label for="">project name</label>
+        <input type="text"  id="projectName" placeholder="This project is by the name of whom">
+
+        <br>
+        <label for="">Umi starting loan</label>
+        <input type="text"  id="aishaLoan" placeholder="Starting loan">
+        
+        <br>
+        <label for="">Abaa starting loan</label>
+        <input type="text"  id="abaaLoan" placeholder="Starting loan">
+
+    </form>
+
+
+    <script>
+        const socket = io()
+        let username = "";
+        const storedUsername = localStorage.getItem("username");
+        if (storedUsername !== null) {
+            username = storedUsername;
+        }
+        socket.emit("checkuser", username)
+
+        socket.on("goLogin", (path) => {
+            //locate the user to the path
+            window.location = `./${path}`;
+        })
+    </script>
+</body>
+
+</html>

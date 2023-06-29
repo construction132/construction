@@ -1,0 +1,55 @@
+<html>
+
+<head>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="styles/index.css">
+</head>
+
+<body>
+
+    <form action="" id="form">
+        <h1>Sign in</h1>
+        <label>Username</label>
+        <input type="text" id="username" placeholder="Enter your username">
+        <label>password</label>
+        <input type="text" id="password" placeholder="Enter your password">
+        <button id="Submit">Submit</button>
+
+    </form>
+
+    <script>
+        const socket = io()
+        document.getElementById("Submit").addEventListener("click", () => {
+            event.preventDefault()
+            //get the username and password
+            let username = document.getElementById("username").value
+            let password = document.getElementById("password").value
+            if (username.length == 0 || password.length == 0) {
+                alert("username and password cannot be empty")
+                getElementById("form").reset();
+                return;
+            }
+
+
+            console.log('sending data to server')
+            socket.emit('login', { username, password });
+
+
+
+
+        })
+        socket.on("loginSuccess", (data) => {
+
+            localStorage.setItem("username", data.username)
+            //locate the user to the path
+            window.location = `/${data.path}`
+        })
+
+        socket.on("loginFailed", (message) => {
+            alert(message)
+        })
+
+    </script>
+</body>
+
+</html>

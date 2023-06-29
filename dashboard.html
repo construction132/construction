@@ -1,0 +1,27 @@
+<html>
+
+<head>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+
+<body>
+    <a href="New.html" class="btn">Create new project</a>
+
+    <script>
+        const socket = io()
+        let username = "";
+        const storedUsername = localStorage.getItem("username");
+        if (storedUsername !== null) {
+            username = storedUsername;
+        }
+        socket.emit("checkuser", username)
+
+        socket.on("goLogin", (path) => {
+            //locate the user to the path
+            window.location = `./${path}`;
+        })
+    </script>
+</body>
+
+</html>

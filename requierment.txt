@@ -1,0 +1,6 @@
+mongoose
+express
+http
+socket.io
+netlify-lambda
+serverless-http
