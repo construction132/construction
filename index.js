@@ -24,6 +24,7 @@ async function connect() {
 }
 
 const User = require("./module/users");
+const Project= require("./module/projects")
 const { error } = require("console");
 
 
@@ -52,6 +53,13 @@ app.get("/dashboard.html", function (req, res) {
 
 app.get("/New.html", function (req, res) {
     res.sendFile(__dirname + "/New.html");
+});
+app.get("/action.html", function (req, res) {
+    res.sendFile(__dirname + "/action.html");
+});
+
+app.get("/statment.html", function (req, res) {
+    res.sendFile(__dirname + "/statment.html");
 });
 
 
@@ -99,8 +107,34 @@ io.on("connection", (socket) => {
 
     })
 
-    socket.on("hi", () => {
-        console.log("hi")
+    socket.on("storeProject", async (data) => {
+        console.log("in socket")
+        abaa = data.abaaLoan
+        umi = data.umiLoan
+        project = data.projectname
+        date = data.date
+
+      
+
+        // Create a new document and save it to the "projects" collection
+        let newProject = new Project({
+            project: project,
+            abaaLoan: abaa,
+            umiLoan: umi,
+            date: date
+        });
+        // Check if a project with the given name already exists
+        let existingProject = await Project.findOne({ project: project });
+
+        if (existingProject) {
+            console.log("found")
+            socket.emit("projectRespones","There is an existed project with the same name")
+        } else {
+            
+            let save = await newProject.save()
+            socket.emit("projectRespones","project has been stored succesfuly")
+
+        }
     })
     //socket on client disconnect
     socket.on("disconnect", () => {
