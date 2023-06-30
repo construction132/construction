@@ -1,27 +1,88 @@
 <html>
-    <head>
-        <script src="/socket.io/socket.io.js"></script>
-        <link rel="stylesheet" href="styles/style.css">
-    </head>
-    <body>
-        <div class="header">
-            <a href="New.html" class="btn">project</a>
-            <a href="action.html" class="btn">Cash in /Cash out</a>
-            <a href="statment.html" class="btn">Statment</a>
-        </div>
-        <script>
-            const socket = io()
-            let username = "";
-            const storedUsername = localStorage.getItem("username");
-            if (storedUsername !== null) {
-                username = storedUsername;
+
+<head>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+
+<body>
+    <div class="header">
+        <a href="New.html" class="btn">project</a>
+        <a href="action.html" class="btn">Cash in /Cash out</a>
+        <a href="statment.html" class="btn">Statment</a>
+    </div>
+
+    <h1>select a project</h1>
+    <div id="choice"></div>
+    <br>
+    <button id="Submit">Submit</button>
+    <div id="statment"></div>
+    <script>
+        const socket = io()
+        let username = "";
+        const storedUsername = localStorage.getItem("username");
+        if (storedUsername !== null) {
+            username = storedUsername;
+        }
+        socket.emit("checkuser", username)
+
+        socket.on("goLogin", (path) => {
+            //locate the user to the path
+            window.location = `./${path}`;
+        })
+
+        let project = null
+        socket.emit("getProjects");
+        socket.on("sendProjects", (projects) => {
+            project = projects;
+            console.log('sending projects');
+            let selectElement = document.createElement("select");
+            selectElement.setAttribute("id", "projectSelect");
+
+            for (let i = 0; i < projects.length; i++) {
+                let optionElement = document.createElement("option");
+                optionElement.textContent = projects[i].project;
+                selectElement.appendChild(optionElement);
             }
-            socket.emit("checkuser", username)
-    
-            socket.on("goLogin", (path) => {
-                //locate the user to the path
-                window.location = `./${path}`;
-            })
-        </script>
-    </body>
+
+            let choiceDiv = document.getElementById("choice");
+            choiceDiv.innerHTML = "";
+            choiceDiv.appendChild(selectElement);
+        });
+
+        document.getElementById("Submit").addEventListener("click", () => {
+            let statementDiv = document.getElementById("statment");
+            statementDiv.innerHTML = ""; // clear the contents of the statement div
+
+            // create a table element
+            let tableElement = document.createElement("table");
+
+            // create a table row for the table header
+            let headerRow = document.createElement("tr");
+            let objectKeys = Object.keys(project[0]); // get the keys of the first object in the project list
+            objectKeys = objectKeys.slice(1, -1);
+            console.log(objectKeys)
+            for (let i = 0; i < objectKeys.length; i++) {
+                let headerCell = document.createElement("th");
+                headerCell.textContent = objectKeys[i];
+                headerRow.appendChild(headerCell);
+            }
+            tableElement.appendChild(headerRow);
+
+            // create a table row for each object in the project list
+            for (let i = 0; i < project.length; i++) {
+                let dataRow = document.createElement("tr");
+                for (let j = 0; j < objectKeys.length; j++) {
+                    let dataCell = document.createElement("td");
+                    dataCell.textContent = project[i][objectKeys[j]];
+                    dataRow.appendChild(dataCell);
+                }
+                tableElement.appendChild(dataRow);
+            }
+
+            statementDiv.appendChild(tableElement);
+        });
+    </script>
+</body>
+
 </html>
