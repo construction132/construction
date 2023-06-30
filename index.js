@@ -149,6 +149,15 @@ io.on("connection", (socket) => {
             socket.emit("projectRespones","the project has beed removed successfully")
 
     })
+
+    
+    socket.on("getProjects", async() => {
+
+       //get all the projects in the project table\
+       const projects = await Project.find();
+       console.log(projects)
+       socket.emit("sendProjects",projects)
+    })
     //socket on client disconnect
     socket.on("disconnect", () => {
 
