@@ -17,7 +17,7 @@
         <br>
         <button id="Submit">Submit</button>
     </div>
-
+    <br>
     <div id="btns" style="display: none;">
         <button id="add">Add action</button>
         <button id="edit">Edit action</button>
@@ -25,19 +25,25 @@
     </div>
     <h2 id="project"></h2>
     <div id="cashin/out" style="display: none; flex-direction: column; width: 100%; align-items: center;">
-        
-        <div id="container2" >
+
+        <div id="container2">
 
             <div style="display: flex; flex-direction:column; align-items: center;">
                 <h1>Cash in</h1>
                 <div id="container">
                     <label for="">Abaa cash in</label>
-                    <input type="number" name="" id="rentMoney" placeholder="Enter the amount cash in">
+                    <input type="number" name="" id="abaa" placeholder="Enter the amount cash in" value="300">
                 </div>
                 <br>
                 <div id="container">
                     <label for="">Umi cash in</label>
-                    <input type="number" name="" id="rentMoney" placeholder="Enter the amount cash in">
+                    <input type="number" name="" id="umi" placeholder="Enter the amount cash in" value="300">
+                </div>
+                <br>
+
+                <div id="container">
+                    <label for="">Cash in date</label>
+                    <input type="date" id="date2">
                 </div>
                 <br>
                 <input type="submit" name="" id="CashInSubmit">
@@ -47,38 +53,42 @@
                 <h1>Cash out</h1>
                 <div id="container">
                     <label for="">Rent money</label>
-                    <input type="number" name="" id="rentMoney" placeholder="Enter the amount of rent">
+                    <input type="number" name="" id="rentMoney" placeholder="Enter the amount of rent" value="300">
                 </div>
                 <br>
                 <div id="container">
                     <label for="">Cash money</label>
-                    <input type="number" name="" id="CashMoney" placeholder="Enter the amount of Cash">
+                    <input type="number" name="" id="CashMoney" placeholder="Enter the amount of Cash" value="300">
                 </div>
                 <br>
                 <div id="container">
-                    <label for="">Withdraw money</label>
-                    <input type="number" name="" id="CashMoney" placeholder="Enter the amount of Cash">
+                    <label for="">Abaa percentage</label>
+                    <input type="number" name="" id="percentage" placeholder="if 70% type 70" value="30">
+                </div>
+                <br>
+                <div id="container">
+                    <label for="">Umi Cash out</label>
+                    <input type="number" name="" id="Withdraw" placeholder="Enter the amount of Cash" value="300">
 
                 </div>
                 <br>
                 <div id="container">
-                    <label for="">For who</label>
-                    <div id="choice2"></div>
-
+                    <label for="">Abaa Cash out</label>
+                    <input type="number" name="" id="Withdraw2" placeholder="Enter the amount of Cash" value="300">
                 </div>
                 <br>
                 <div id="container">
                     <label for="">Cash out date</label>
-                    <input type="date">
+                    <input type="date" id="date">
 
                 </div>
                 <br>
                 <input type="submit" name="" id="CashOutSubmit">
             </div>
-            
+
         </div>
         <h3>submit together</h1>
-        <input type="submit" name="" id="together">
+            <input type="submit" name="" id="together">
     </div>
     <script>
         const socket = io()
@@ -94,6 +104,8 @@
             window.location = `./${path}`;
         })
 
+
+        let projectOwner=""
         socket.emit("getProjects");
         socket.on("sendProjects", (projects) => {
             project = projects;
@@ -119,17 +131,82 @@
             let selectElement = document.getElementById("projectSelect");
             let selectedProject = selectElement.value;
             document.getElementById("project").innerHTML = selectedProject + " Project"
+            projectOwner=selectedProject
         })
 
         document.getElementById("add").addEventListener("click", () => {
             document.getElementById("cashin/out").style.display = "flex"
-            
+
         })
         document.getElementById("edit").addEventListener("click", () => {
             document.getElementById("cashin/out").style.display = "none"
         })
-        document.getElementById("delete").addEventListener("click", () => {
+        document.getElementById("Delete").addEventListener("click", () => {
             document.getElementById("cashin/out").style.display = "none"
+        })
+
+        document.getElementById("CashOutSubmit").addEventListener("click", () => {
+            document.getElementById("cashin/out").style.display = "none"
+        })
+
+        document.getElementById("CashInSubmit").addEventListener("click", () => {
+            let umi = document.getElementById("umi").value;
+            let abaa = document.getElementById("abaa").value;
+            let date = document.getElementById("date2").value;
+
+            if (umi == null) {
+                umi = 0
+            }
+            if (abaa == null) {
+                abaa = 0
+            }
+            if (date == null) {
+                alert("date connot be empty")
+            }
+        })
+        document.getElementById("together").addEventListener("click", () => {
+            let date1 = document.getElementById("date").value
+            let date2 = document.getElementById("date2").value
+            if (date1 !== date2) {
+                alert("both dates has to be the same")
+                return
+            }
+            else if (date1 == null || date2 == null) {
+                alert("dates must be specified")
+                return
+            }
+
+            let rent = 0
+            let Cash = 0
+            let abaapercentage = 0
+            let umipercentage = 0
+            let umiIn = 0
+            let abaaIn = 0
+            let UmiOut = 0
+            let AbaaOut=0
+            if (document.getElementById("abaa").value != null)
+                abaaIn = parseFloat(document.getElementById("abaa").value)
+            if (document.getElementById("umi").value != null)
+                umiIn = parseFloat(document.getElementById("umi").value)
+            if (document.getElementById("percentage").value != null) {
+                abaapercentage = parseFloat(document.getElementById("percentage").value) / 100
+                umipercentage = 1 - abaapercentage
+            }
+            else {
+                alert("percentage has to be specified")
+                return
+            }
+            if (document.getElementById("CashMoney").value != null)
+                Cash = parseFloat(document.getElementById("CashMoney").value)
+            if (document.getElementById("rentMoney").value != null)
+                rent = parseFloat(document.getElementById("rentMoney").value)
+            if (document.getElementById('Withdraw').value != null)
+                UmitOut = parseFloat(document.getElementById('Withdraw').value)
+            if (document.getElementById('Withdraw2').value != null)
+                AbaaOut = parseFloat(document.getElementById('Withdraw2').value)
+            console.log("hi")
+       
+            socket.emit("addAction", { date1, date2, abaaIn, umiIn, Cash, rent, abaapercentage, umipercentage, UmiOut, AbaaOut,projectOwner})
         })
     </script>
 </body>

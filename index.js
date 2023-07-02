@@ -9,6 +9,10 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
+const User = require("./module/users");
+const Project = require("./module/projects")
+const statment= require("./classes/statment.js")
+
 
 connect()
 async function connect() {
@@ -23,9 +27,6 @@ async function connect() {
     }
 }
 
-const User = require("./module/users");
-const Project= require("./module/projects")
-const { error } = require("console");
 
 
 //publishing the website on localhost:4500
@@ -80,7 +81,7 @@ io.on("connection", (socket) => {
             }
             const user = users[0];
             console.log(user)
-            const loggedInUsername = user.name; // Use a different variable name here
+            const loggedInUsername = user.name; 
             const path = "dashboard.html";
             socket.emit("loginSuccess", { username: loggedInUsername, path });
         } catch (error) {
@@ -114,8 +115,6 @@ io.on("connection", (socket) => {
         project = data.projectname
         date = data.date
 
-      
-
         // Create a new document and save it to the "projects" collection
         let newProject = new Project({
             project: project,
@@ -128,35 +127,73 @@ io.on("connection", (socket) => {
 
         if (existingProject) {
             console.log("found")
-            socket.emit("projectRespones","There is an existed project with the same name")
+            socket.emit("projectRespones", "There is an existed project with the same name")
         } else {
-            
+
             let save = await newProject.save()
-            socket.emit("projectRespones","project has been stored succesfuly")
+            socket.emit("projectRespones", "project has been stored succesfuly")
 
         }
     })
 
-    socket.on("removeProject", async(projectname) => {
+    socket.on("removeProject", async (projectname) => {
 
         //remove from the project collection the project of the specifc projectname
-        let deletee=await Project.deleteOne({ project:projectname })
+        let deletee = await Project.deleteOne({ project: projectname })
         console.log(deletee)
         //if print if there was a project has been deleted or no 
-        if(deletee.deletedCount==0)
-            socket.emit("projectRespones","nothing has been deleted")
+        if (deletee.deletedCount == 0)
+            socket.emit("projectRespones", "nothing has been deleted")
         else
-            socket.emit("projectRespones","the project has beed removed successfully")
+            socket.emit("projectRespones", "the project has beed removed successfully")
 
     })
 
-    
-    socket.on("getProjects", async() => {
 
-       //get all the projects in the project table\
-       const projects = await Project.find();
-       console.log(projects)
-       socket.emit("sendProjects",projects)
+    socket.on("getProjects", async () => {
+
+        //get all the projects in the project table\
+        const projects = await Project.find();
+        socket.emit("sendProjects", projects)
+    })
+
+
+    socket.on("addAction", async (data) => {
+        let date1 = data.date1
+        let date2 = data.date2
+        let abaaIn = data.abaaIn
+        let umiIn = data.umiIn
+        let Cash = data.Cash
+        let rent = data.rent
+        let abaapercentage = data.abaapercentage
+        let umipercentage = data.umipercentage
+        let UmiOut = data.UmiOut
+        let AbaaOut = data.AbaaOut
+        let projectOwner = data.projectOwner
+        //retrive the project from the database that has name of projectowner
+        let owner = {};
+        try {
+            owner = await Project.findOne({ project: projectOwner })
+        } catch (err) {
+            console.log("there is an error happened")
+
+        }
+   
+        console.log("the owner is " +owner)
+        try
+        {
+            let newstatment= new statment(owner.abaaLoan,owner.umiLoan,abaaIn,umiIn,rent,Cash,abaapercentage,umipercentage,AbaaOut,UmiOut,date1)
+         
+            let done=await newstatment.calculateRemainingLoan()
+            console.log(newstatment)
+         
+        }
+        catch(error)
+        {
+            console.log(error)
+        }
+        
+       
     })
     //socket on client disconnect
     socket.on("disconnect", () => {
