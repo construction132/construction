@@ -9,9 +9,10 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
-const User = require("./module/users");
-const Project = require("./module/projects")
-const statment= require("./classes/statment.js")
+const User = require("./module/users.js");
+const Project = require("./module/projects.js")
+const statment = require("./classes/statment.js")
+const Action = require("./module/actions.js")
 
 
 connect()
@@ -81,7 +82,7 @@ io.on("connection", (socket) => {
             }
             const user = users[0];
             console.log(user)
-            const loggedInUsername = user.name; 
+            const loggedInUsername = user.name;
             const path = "dashboard.html";
             socket.emit("loginSuccess", { username: loggedInUsername, path });
         } catch (error) {
@@ -134,6 +135,9 @@ io.on("connection", (socket) => {
             socket.emit("projectRespones", "project has been stored succesfuly")
 
         }
+
+        startAction({ date, abaa, umi, project })
+
     })
 
     socket.on("removeProject", async (projectname) => {
@@ -173,28 +177,51 @@ io.on("connection", (socket) => {
         //retrive the project from the database that has name of projectowner
         let owner = {};
         try {
-            owner = await Project.findOne({ project: projectOwner })
+            owner = await Action.find({ owner: projectOwner })
         } catch (err) {
             console.log("there is an error happened")
+            return
+        }   
+
+        console.log("the owner is " + owner[owner.length-1].remainingAbaa+ "p owner "+projectOwner)
+        try {
+            let newstatment = new statment(owner[owner.length-1].remainingAbaa, owner[owner.length-1].remainingUmi, abaaIn, umiIn, rent, Cash, abaapercentage, umipercentage, AbaaOut, UmiOut, date1,owner[owner.length-1].abaaTotal,owner[owner.length-1].umiTotal)
+
+            let done = await newstatment.calculateRemainingLoan()
+            let newAction = new Action({
+                actionNumber: 0,
+                owner: projectOwner,
+                abaaLoan: newstatment.abaaLoan,
+                umiLoan: newstatment.umiLoan,
+                abaaIn: newstatment.abaaIn,
+                umiIn: newstatment.umiIn,
+                rent: newstatment.rent,
+                cash: newstatment.cash,
+                cashShling: newstatment.cashShling,
+                abaaPercentage: newstatment.abaaPercentage,
+                umiPercentage: newstatment.umiPercentage,
+                total: newstatment.total,
+                abaaOut: newstatment.abaaOut,
+                umiOut: newstatment.umiOut,
+                abaaTotal: newstatment.abaaTotal,
+                umiTotal: newstatment.umiTotal,
+                remainingAbaa: newstatment.remainingAbaa,
+                remainingUmi: newstatment.remainingUmi,
+                remainingTotal: newstatment.remainingTotal,
+                shlingFactor: newstatment.shlingFactor,
+                date: newstatment.date
+            });
+            let save = await newAction.save()
 
         }
-   
-        console.log("the owner is " +owner)
-        try
-        {
-            let newstatment= new statment(owner.abaaLoan,owner.umiLoan,abaaIn,umiIn,rent,Cash,abaapercentage,umipercentage,AbaaOut,UmiOut,date1)
-         
-            let done=await newstatment.calculateRemainingLoan()
-            console.log(newstatment)
-         
-        }
-        catch(error)
-        {
+        catch (error) {
             console.log(error)
         }
-        
-       
+
+
     })
+
+    
     //socket on client disconnect
     socket.on("disconnect", () => {
 
@@ -202,3 +229,40 @@ io.on("connection", (socket) => {
     })
 
 })
+
+
+async function startAction(data)
+{
+    console.log("got the emit")
+    let date = data.date;
+    let abaa = data.abaa
+    let umi = data.umi
+    let project = data.project
+    console.log("starting action")
+
+    let newAction = new Action({
+        actionNumber: 0,
+        owner: project,
+        abaaLoan: abaa,
+        umiLoan: umi,
+        abaaIn: 0,
+        umiIn: 0,
+        rent: 0,
+        cash: 0,
+        cashShling: 0,
+        abaaPercentage: 0,
+        umiPercentage: 0,
+        total: 0,
+        abaaOut: 0,
+        umiOut: 0,
+        abaaTotal: 0,
+        umiTotal: 0,
+        remainingAbaa: abaa,
+        remainingUmi: umi,
+        remainingTotal: abaa+umi,
+        shlingFactor: 0,
+        date: date
+    });
+    let save = await newAction.save()
+    console.log("action has started")
+}
