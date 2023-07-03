@@ -1,9 +1,0 @@
-const mongoose = require("mongoose")
-let projectSchema = new mongoose.Schema({
-    actionNumber: Number,
-    abaaLoan: Number,
-    umiLoan: Number,
-    date: String
-});
-
-module.exports= mongoose.model("Project", projectSchema);
