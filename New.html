@@ -6,45 +6,62 @@
 </head>
 
 <body>
+    <section> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> 
+   
     <div class="header">
         <a href="New.html" class="btn">project</a>
         <a href="action.html" class="btn">Cash in /Cash out</a>
         <a href="statment.html" class="btn">Statment</a>
     </div>
-    <h1>select an option</h1>
-    <div>
-        <button id="create">create project</button>
-        <button id="delete">delete project</button>
+  
+    <div class="signin">
+        <h1 style="color: rgb(0, 248, 0) ;">select an option</h1>
+            <div class="inputbtn">
+                <button id="create">create project</button>
+                <button id="delete">delete project</button>
+            </div>
+           
+        <br><br>
+    
+        <form action="" id="form" style="display: none;">
+            <div class="inputBox"> 
+
+                <input type="date" id="date" required> <i>Date</i> 
+         
+            </div> 
+            <div class="inputBox"> 
+
+                <input type="text" id="projectName"  required> <i>Project name</i> 
+         
+            </div> 
+            <div class="inputBox"> 
+
+                <input type="number" id="aishaLoan"  required> <i>Umi starting loan</i> 
+         
+            </div> 
+            <div class="inputBox"> 
+
+                <input type="number" id="abaaLoan"  required> <i>Abaa starting loan</i> 
+         
+            </div> 
+            <button id="Submit">Submit</button>
+          
+    
+        </form>
+    
+        <form action="" id="form2" style="display: none;">
+            <div class="inputBox"> 
+
+                <input type="text" id="projectName2"  required> <i>Project name</i> 
+         
+            </div> 
+            <button id="Submit2">Submit</button>
+    
+        </form>
+    
     </div>
-    <br><br>
-
-    <form action="" id="form" style="display: none;">
-        <label for="">project name</label>
-        <input type="text" id="projectName" placeholder="This project is by the name of whom">
-        <br>
-        <label for="">Umi starting loan</label>
-        <input type="number" id="aishaLoan" placeholder="Starting loan">
-        <br>
-
-        <label for="">Abaa starting loan</label>
-        <input type="number" id="abaaLoan" placeholder="Starting loan">
-        <br>
-        <label for="">Starting date</label>
-        <input type="date" id="date">
-        <br>
-        <button id="Submit">Submit</button>
-
-    </form>
-
-    <form action="" id="form2" style="display: none;">
-        <label for="">project name</label>
-        <input type="text" id="projectName2" placeholder="This project is by the name of whom">
-        <br>
-        <button id="Submit2">Submit</button>
-
-    </form>
-
-
+   
+</section>
 
     <script>
         const socket = io()
@@ -65,10 +82,13 @@
         document.getElementById("create").addEventListener("click", () => {
             document.getElementById("form").style.display = "flex";
             document.getElementById("form2").style.display = "none";
+            console.log("hi")
         })
         document.getElementById("delete").addEventListener("click", () => {
             document.getElementById("form2").style.display = "flex";
             document.getElementById("form").style.display = "none";
+
+            console.log("hi")
         })
 
 
@@ -89,10 +109,10 @@
             let project = document.getElementById("projectName").value
             let datee = document.getElementById("date").value
 
-            if (abaa != null)
-                abaaLoan = abaa
-            if (umi != null)
-                umiLoan = umi
+            if (abaa !== null && abaa !== "")
+                abaaLoan = parseInt(abaa)
+            if (umi !== null && umi !== "")
+                umiLoan = parseInt(umi)
             if (project != null)
                 projectname = project
             else {
@@ -107,7 +127,7 @@
             }
 
 
-            console.log("will store")
+            console.log(umiLoan)
             socket.emit("storeProject", { abaaLoan, umiLoan, projectname, date })
             socket.once("projectRespones", (message) => {
 
