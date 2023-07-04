@@ -164,7 +164,6 @@ io.on("connection", (socket) => {
 
     socket.on("addAction", async (data) => {
         let date1 = data.date1
-        let date2 = data.date2
         let abaaIn = data.abaaIn
         let umiIn = data.umiIn
         let Cash = data.Cash
@@ -174,6 +173,8 @@ io.on("connection", (socket) => {
         let UmiOut = data.UmiOut
         let AbaaOut = data.AbaaOut
         let projectOwner = data.projectOwner
+        let abaaSource= data.abaaSource
+        let umiSource=data.umiSource
         //retrive the project from the database that has name of projectowner
         let owner = {};
         try {
@@ -189,12 +190,14 @@ io.on("connection", (socket) => {
 
             let done = await newstatment.calculateRemainingLoan()
             let newAction = new Action({
-                actionNumber: 0,
+                actionNumber: owner.length+1,
                 owner: projectOwner,
                 abaaLoan: newstatment.abaaLoan,
                 umiLoan: newstatment.umiLoan,
                 abaaIn: newstatment.abaaIn,
+                abaaSource:abaaSource,
                 umiIn: newstatment.umiIn,
+                umiSource:umiSource,
                 rent: newstatment.rent,
                 cash: newstatment.cash,
                 cashShling: newstatment.cashShling,
@@ -221,6 +224,19 @@ io.on("connection", (socket) => {
 
     })
 
+
+     socket.on("getspecificProject", async(name) => {
+
+        let action = {};
+        try {
+            action = await Action.find({ owner: name })
+        } catch (err) {
+            console.log("there is an error happened")
+            return
+        }
+        socket.emit("sendActions",action)  
+    })
+
     
     //socket on client disconnect
     socket.on("disconnect", () => {
@@ -241,7 +257,7 @@ async function startAction(data)
     console.log("starting action")
 
     let newAction = new Action({
-        actionNumber: 0,
+        actionNumber: 1,
         owner: project,
         abaaLoan: abaa,
         umiLoan: umi,
