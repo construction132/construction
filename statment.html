@@ -2,7 +2,7 @@
 
 <head>
     <script src="/socket.io/socket.io.js"></script>
-    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/statment.css">
 </head>
 
 <body>
@@ -43,18 +43,22 @@
         <a href="New.html" class="btn">project</a>
         <a href="action.html" class="btn">Cash in /Cash out</a>
         <a href="statment.html" class="btn">Statment</a>
+        <a href="index.html" class="btn">Logout</a>
     </div>
 
-    <h1>select a project</h1>
-    <div id="choice"></div>
-    <br>
-    <button id="Submit">Submit</button>
-    <div id="statment">
-       
+    <div class="signin">
+        <h1>select a project</h1>
+        <div id="choice"></div>
+        <br>
+        <button id="Submit">Submit</button>
+        <div id="statment" >
+           
+        </div>
+        <div id="statment2">
+           
+        </div>
     </div>
-    <div id="statment2">
-       
-    </div>
+    
     </section>
     <script>
         const socket = io()
@@ -62,6 +66,10 @@
         const storedUsername = localStorage.getItem("username");
         if (storedUsername !== null) {
             username = storedUsername;
+            if(localStorage.getItem("username")=="admin")
+                document.getElementById("statment2").style.display="none"
+            else if (localStorage.getItem("username")=="user")
+                document.getElementById("statment").style.display="none"
         }
         socket.emit("checkuser", username)
 

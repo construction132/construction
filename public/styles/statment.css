@@ -62,7 +62,8 @@ label
     justify-content: space-around;
     position: fixed;
     top: 0%;
-    
+    z-index: 100;
+    position: fixed;
 
 
 }
@@ -85,6 +86,24 @@ body{
    
 }
 
+table {
+    border-collapse: collapse;
+    border-spacing: 0; /* optional, sets the space between adjacent cells */
+  }
+  
+  th, tr {
+    border: 1px solid #0f0; /* sets a solid green border with a width of 1 pixel */
+    color: #fff; /* sets the color of the text to white */
+  }
+th{
+    color: #0f0;
+    border: 1cm #0f0;
+}
+tr
+{
+    color: white;
+    border: 1cm #0f0;
+}
 table th, table td {
     max-width: 100px;
     height: auto;
@@ -115,7 +134,7 @@ table{
      border-spacing: 0;
 }
 td, th {
-    border: 1px solid black;
+    border: 1px solid #0f0;
    padding:2;
   }
 
@@ -142,10 +161,11 @@ section
   height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  
   gap: 2px;
   flex-wrap: wrap;
-  overflow: hidden;
+  max-height: 100vh; /* limit height to viewport height */
+  overflow-y: auto; /* add vertical scrollbar when necessary */
   
 }
 section::before 
@@ -187,7 +207,7 @@ section span:hover
 section .signin
 {
   position: absolute;
-  width: 500px;
+  width: auto;
   background: #222;  
   margin-top: 70px;
   display: flex;

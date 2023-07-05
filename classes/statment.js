@@ -1,5 +1,5 @@
 class Statement {
-    constructor(abaaLoan, umiLoan, abaaIn, umiIn, rent, cash, abaaPercentage, umiPercentage, abaaOut, umiOut, date,abaaTotal,umiTotal) {
+    constructor(abaaLoan, umiLoan, abaaIn, umiIn, rent, cash, abaaLoneDecrease, umiLoneDecrease, abaaOut, umiOut, date,abaaTotal,umiTotal) {
         this.abaaLoan = abaaLoan;
         this.umiLoan = umiLoan;
         this.abaaIn = abaaIn;
@@ -7,8 +7,8 @@ class Statement {
         this.rent = rent;
         this.cash = cash;
         this.cashShling = 0;
-        this.abaaPercentage = abaaPercentage;
-        this.umiPercentage = umiPercentage;
+        this.abaaLoneDecrease = abaaLoneDecrease;
+        this.umiLoneDecrease = umiLoneDecrease;
         this.total = 0;
         this.abaaOut = abaaOut;
         this.umiOut = umiOut;
@@ -27,19 +27,19 @@ class Statement {
         await this.netMoney("abaa");
         await this.netMoney("umi");
         
-        this.remainingAbaa = parseInt(this.abaaLoan - (this.total * this.abaaPercentage)+this.abaaIn);
-        this.remainingUmi = parseInt(this.umiLoan - (this.total * this.umiPercentage)+this.umiIn);
+        this.remainingAbaa = parseInt(this.abaaLoan - (this.abaaLoneDecrease)+this.abaaIn);
+        this.remainingUmi = parseInt(this.umiLoan - (this.umiLoneDecrease)+this.umiIn);
         this.remainingTotal = this.remainingAbaa + this.remainingUmi;
         return true;
       }
       
       async netMoney(loaner) {
         console.log("calculating net money");
-        console.log("the precentage is  is "+ this.abaaPercentage)
+        console.log("abaadecrese is "+this.abaaLoneDecrease+"and abaa out is "+ this.abaaOut)
         if (loaner == "abaa") {
-          this.abaaTotal += parseInt((this.total * this.abaaPercentage)-this.abaaOut);
+          this.abaaTotal += parseInt((this.abaaLoneDecrease)-this.abaaOut);
         } else if (loaner == "umi") {
-          this.umiTotal += parseInt((this.total * this.umiPercentage)-this.umiOut);
+          this.umiTotal += parseInt((this.umiLoneDecrease)-this.umiOut);
         }
         return true;
       }
@@ -72,7 +72,7 @@ class Statement {
           throw new Error(`Error: ${data.error.message}`);
         }
         
-        this.shlingFactor = data.rates[fromCurrency];
+        this.shlingFactor = data.rates[fromCurrency]*10;
         console.log(this.shlingFactor)
         return true;
       }
