@@ -13,6 +13,8 @@ const User = require("./module/users.js");
 const Project = require("./module/projects.js")
 const statment = require("./classes/statment.js")
 const Action = require("./module/actions.js")
+const loans = require("./module/loans.js")
+const loanAction = require("./module/loanAction.js")
 
 
 connect()
@@ -73,7 +75,7 @@ io.on("connection", (socket) => {
     socket.on("login", async (data) => {
         const username = data.username;
         const password = data.password;
-        console.log("name is "+username+ " password is " + password)
+        console.log("name is " + username + " password is " + password)
         try {
             const users = await User.find({ name: username, password: password });
             if (users.length === 0) {
@@ -142,7 +144,7 @@ io.on("connection", (socket) => {
         }
 
         startAction({ date, abaa, umi, project })
-        //startLoan({ date, omar, rageeb, project })
+        startLoan({ date, omar, rageeb, project })
 
     })
 
@@ -176,14 +178,14 @@ io.on("connection", (socket) => {
         let rent = data.rent
         let abaaLoneDecrease = data.abaaLoan
         let umiLoneDecrease = data.umiLoan
-        let outSource=data.outSource
-       
+        let outSource = data.outSource
+
         let UmiOut = data.UmiOut
         let AbaaOut = data.AbaaOut
         let projectOwner = data.projectOwner
         let abaaSource = data.abaaSource
         let umiSource = data.umiSource
-        console.log("umi decrese is  ",umiLoneDecrease)
+        console.log("umi decrese is  ", umiLoneDecrease)
         //retrive the project from the database that has name of projectowner
         let owner = {};
         try {
@@ -215,7 +217,7 @@ io.on("connection", (socket) => {
                 total: newstatment.total,
                 abaaOut: newstatment.abaaOut,
                 umiOut: newstatment.umiOut,
-                outSource:outSource,
+                outSource: outSource,
                 abaaTotal: newstatment.abaaTotal,
                 umiTotal: newstatment.umiTotal,
                 remainingAbaa: newstatment.remainingAbaa,
@@ -250,17 +252,17 @@ io.on("connection", (socket) => {
     socket.on('gettotal', async (cash, rent, callback) => {
         console.log("in total")
         try {
-          const factor = await getfactor();
-          // Add the cash and rent together
-          const total = cash * factor + rent;
-      
-          // Return the total to the client using the provided callback function
-          callback(total);
+            const factor = await getfactor();
+            // Add the cash and rent together
+            const total = cash * factor + rent;
+
+            // Return the total to the client using the provided callback function
+            callback(total);
         } catch (error) {
-          console.error(error);
-          callback(0); // Return 0 to the client in case of an error
+            console.error(error);
+            callback(0); // Return 0 to the client in case of an error
         }
-      });
+    });
 
     //socket on client disconnect
     socket.on("disconnect", () => {
@@ -283,7 +285,7 @@ async function getfactor() {
         throw new Error(`Error: ${data.error.message}`);
     }
 
-    let factor= data.rates[fromCurrency] * 10;
+    let factor = data.rates[fromCurrency] * 10;
     console.log(this.shlingFactor)
     return factor;
 
@@ -329,22 +331,63 @@ async function startLoan(data) {
     let date = data.date;
     let omar = data.omar
     let rageeb = data.rageeb
+    let project = data.project
 
-
-    let umi = 0
-    if (data.umi)
-        umi = data.umi
-    let abaa = 0
-    if (data.abaa)
-        abaa = data.abaa
-    let umiSource = ""
-    if (data.umiSource)
-        umiSource = data.umiSource
-    let abaaSource = ""
-    if (data.abaaSource)
-        abaaSource = data.abaaSource
-
-
-    let newLoan = loan(date, omar, rageeb, umi, umiSource, abaa, abaaSource)
+    let rageebLoan = new loans({
+        project: project,
+        StartingLoan: rageeb,
+        loaner: "rageeb",
+        date: date,
+    });
+    let omarLoan = new loans({
+        project: project,
+        loaner: "omar",
+        StartingLoan: omar,
+        date: date,
+    });
+    let save = await rageebLoan.save()
+    save = await omarLoan.save()
+ 
+    await StartLoanAction({date,loaner:"omar",startLoan:omar,project})
+    await StartLoanAction({date,loaner:"rageeb",startLoan:rageeb,project})
 
 }
+
+async function StartLoanAction(data){
+    let date = data.date;
+    let loaner = data.loaner
+    let startingLoan= data.startLoan
+    let project = data.project
+    let umi=0
+    let abaa=0
+    let swafia=0
+    let UAE=0
+    let house=0
+    if(data.umi)
+    umi=data.umi
+    if(data.abaa)
+    abaa=data.abaa
+    if(data.swafia)
+    swafia=data.swafia
+    if(data.UAE)
+    UAE=data.UAE
+    if(data.house)
+    house=data.house
+
+    let newLoanAction = new loanAction({
+        project:project,
+        loaner:loaner,
+        date:date,
+        startingLoan:startingLoan,
+        umi:umi,
+        paid:0,
+        abaa:abaa,
+        house:house,
+        UAE:UAE,
+        swafia:swafia,
+        total:0,
+        remaining:startingLoan    
+    })
+    let save = await newLoanAction.save()
+}
+
