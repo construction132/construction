@@ -176,12 +176,14 @@ io.on("connection", (socket) => {
         let rent = data.rent
         let abaaLoneDecrease = data.abaaLoan
         let umiLoneDecrease = data.umiLoan
-        console.log("from socket abaa decrese is ",abaaLoneDecrease)
+        let outSource=data.outSource
+       
         let UmiOut = data.UmiOut
         let AbaaOut = data.AbaaOut
         let projectOwner = data.projectOwner
         let abaaSource = data.abaaSource
         let umiSource = data.umiSource
+        console.log("umi decrese is  ",umiLoneDecrease)
         //retrive the project from the database that has name of projectowner
         let owner = {};
         try {
@@ -213,6 +215,7 @@ io.on("connection", (socket) => {
                 total: newstatment.total,
                 abaaOut: newstatment.abaaOut,
                 umiOut: newstatment.umiOut,
+                outSource:outSource,
                 abaaTotal: newstatment.abaaTotal,
                 umiTotal: newstatment.umiTotal,
                 remainingAbaa: newstatment.remainingAbaa,

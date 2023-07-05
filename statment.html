@@ -116,7 +116,7 @@
             let objectKeys = Object.keys(project[0]); // get the keys of the first object in the project list
             objectKeys = objectKeys.slice(1, -1);
             console.log(objectKeys)
-            let keysToInclude2 = ["N", "abaa Loan", "umi Loan", "abaa In","abaa Source", "umi In","umi Source", "rent", "cash", "cash Shling", "total", "abaa Out", "umi Out", "abaa Total", "umi Total", "remaining Abaa", "remaining Umi", "remaining Total", "date"];
+            let keysToInclude2 = ["N", "abaa Loan", "umi Loan", "abaa In","abaa Source", "umi In","umi Source", "rent", "cash", "cash Shling", "total", "abaa Out", "umi Out","out Source", "abaa Total", "umi Total", "remaining Abaa", "remaining Umi", "remaining Total", "date"];
             for (let i = 0; i < keysToInclude2.length; i++) {
                 let headerCell = document.createElement("th");
                 headerCell.textContent = keysToInclude2[i];
@@ -124,8 +124,10 @@
             }
             tableElement.appendChild(headerRow);
             //specify the nassasry colomns
-            let keysToInclude = ["actionNumber", "abaaLoan", "umiLoan", "abaaIn","abaaSources", "umiIn","umiSource", "rent", "cash", "cashShling", "total", "abaaOut", "umiOut", "abaaTotal", "umiTotal", "remainingAbaa", "remainingUmi", "remainingTotal", "date"];
+            let keysToInclude = ["actionNumber", "abaaLoan", "umiLoan", "abaaIn","abaaSource", "umiIn","umiSource", "rent", "cash", "cashShling", "total", "abaaOut", "umiOut" ,"outSource", "abaaTotal", "umiTotal", "remainingAbaa", "remainingUmi", "remainingTotal", "date"];
             // create a table row for each object in the project list
+            console.log(project[project.length-1].outSource)
+           
             for (let i = 0; i < project.length; i++) {
                 let dataRow = document.createElement("tr");
                 for (let j = 0; j < keysToInclude.length; j++) {

@@ -126,7 +126,7 @@
                         </div>
                         <div class="inputBox">
 
-                            <input type="outSource" name="" id="percentage"> <i>Cash out source</i>
+                            <input type="outSource" name="" id="outSource"> <i>Cash out source</i>
 
                         </div>
                         <div class="inputBox">
@@ -243,7 +243,7 @@
                 umiLoan = parseFloat(document.getElementById("umiLoan").value)
             }
             else {
-                alert("abaa loan has to be specified")
+                alert("umi loan has to be specified")
                 return
             }
 
@@ -252,7 +252,7 @@
             if (document.getElementById("rentMoney").value !== null && document.getElementById("rentMoney").value !== "")
                 rent = parseFloat(document.getElementById("rentMoney").value)
             if (document.getElementById('Withdraw').value !== null && document.getElementById("Withdraw").value !== "")
-                UmitOut = parseFloat(document.getElementById('Withdraw').value)
+                UmiOut = parseFloat(document.getElementById('Withdraw').value)
             if (document.getElementById('Withdraw2').value !== null && document.getElementById("Withdraw2").value !== "")
                 AbaaOut = parseFloat(document.getElementById('Withdraw2').value)
             let total = await new Promise((resolve, reject) => {
@@ -266,7 +266,12 @@
                 alert("you can't give more than the total income from cash and rent which is " + total)
                 return
             }
-            socket.emit("addAction", { abaaSource, umiSource, date, abaaIn, umiIn, Cash, rent, abaaLoan, umiLoan, UmiOut, AbaaOut, projectOwner })
+            let outSource=""
+            if (document.getElementById('outSource').value !== null && document.getElementById("outSource").value !== "")
+            outSource = document.getElementById('outSource').value
+            console.log(outSource)
+
+            socket.emit("addAction", { abaaSource, umiSource, date, abaaIn, umiIn, Cash, rent, abaaLoan, umiLoan, UmiOut, AbaaOut, projectOwner,outSource})
 
         })
 
