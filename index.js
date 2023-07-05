@@ -73,6 +73,7 @@ io.on("connection", (socket) => {
     socket.on("login", async (data) => {
         const username = data.username;
         const password = data.password;
+        console.log("name is "+username+ " password is " + password)
         try {
             const users = await User.find({ name: username, password: password });
             if (users.length === 0) {
@@ -113,6 +114,8 @@ io.on("connection", (socket) => {
         console.log("in socket")
         abaa = data.abaaLoan
         umi = data.umiLoan
+        omar = data.omarLoan
+        rageeb = data.rageebLoan
         project = data.projectname
         date = data.date
 
@@ -121,6 +124,8 @@ io.on("connection", (socket) => {
             project: project,
             abaaLoan: abaa,
             umiLoan: umi,
+            rageebLoan: rageeb,
+            omarLoan: omar,
             date: date
         });
         // Check if a project with the given name already exists
@@ -137,6 +142,7 @@ io.on("connection", (socket) => {
         }
 
         startAction({ date, abaa, umi, project })
+        //startLoan({ date, omar, rageeb, project })
 
     })
 
@@ -163,18 +169,19 @@ io.on("connection", (socket) => {
 
 
     socket.on("addAction", async (data) => {
-        let date1 = data.date1
+        let date1 = data.date
         let abaaIn = data.abaaIn
         let umiIn = data.umiIn
         let Cash = data.Cash
         let rent = data.rent
-        let abaapercentage = data.abaapercentage
-        let umipercentage = data.umipercentage
+        let abaaLoneDecrease = data.abaaLoan
+        let umiLoneDecrease = data.umiLoan
+        console.log("from socket abaa decrese is ",abaaLoneDecrease)
         let UmiOut = data.UmiOut
         let AbaaOut = data.AbaaOut
         let projectOwner = data.projectOwner
-        let abaaSource= data.abaaSource
-        let umiSource=data.umiSource
+        let abaaSource = data.abaaSource
+        let umiSource = data.umiSource
         //retrive the project from the database that has name of projectowner
         let owner = {};
         try {
@@ -182,27 +189,27 @@ io.on("connection", (socket) => {
         } catch (err) {
             console.log("there is an error happened")
             return
-        }   
+        }
 
-        console.log("the owner is " + owner[owner.length-1].remainingAbaa+ "p owner "+projectOwner)
+        console.log("the owner is " + owner[owner.length - 1].remainingAbaa + "p owner " + projectOwner)
         try {
-            let newstatment = new statment(owner[owner.length-1].remainingAbaa, owner[owner.length-1].remainingUmi, abaaIn, umiIn, rent, Cash, abaapercentage, umipercentage, AbaaOut, UmiOut, date1,owner[owner.length-1].abaaTotal,owner[owner.length-1].umiTotal)
+            let newstatment = new statment(owner[owner.length - 1].remainingAbaa, owner[owner.length - 1].remainingUmi, abaaIn, umiIn, rent, Cash, abaaLoneDecrease, umiLoneDecrease, AbaaOut, UmiOut, date1, owner[owner.length - 1].abaaTotal, owner[owner.length - 1].umiTotal)
 
             let done = await newstatment.calculateRemainingLoan()
             let newAction = new Action({
-                actionNumber: owner.length+1,
+                actionNumber: owner.length + 1,
                 owner: projectOwner,
                 abaaLoan: newstatment.abaaLoan,
                 umiLoan: newstatment.umiLoan,
                 abaaIn: newstatment.abaaIn,
-                abaaSource:abaaSource,
+                abaaSource: abaaSource,
                 umiIn: newstatment.umiIn,
-                umiSource:umiSource,
+                umiSource: umiSource,
                 rent: newstatment.rent,
                 cash: newstatment.cash,
                 cashShling: newstatment.cashShling,
-                abaaPercentage: newstatment.abaaPercentage,
-                umiPercentage: newstatment.umiPercentage,
+                abaaLoneDecrease: newstatment.abaaLoneDecrease,
+                umiLoneDecrease: newstatment.umiLoneDecrease,
                 total: newstatment.total,
                 abaaOut: newstatment.abaaOut,
                 umiOut: newstatment.umiOut,
@@ -225,7 +232,7 @@ io.on("connection", (socket) => {
     })
 
 
-     socket.on("getspecificProject", async(name) => {
+    socket.on("getspecificProject", async (name) => {
 
         let action = {};
         try {
@@ -234,10 +241,24 @@ io.on("connection", (socket) => {
             console.log("there is an error happened")
             return
         }
-        socket.emit("sendActions",action)  
+        socket.emit("sendActions", action)
     })
 
-    
+    socket.on('gettotal', async (cash, rent, callback) => {
+        console.log("in total")
+        try {
+          const factor = await getfactor();
+          // Add the cash and rent together
+          const total = cash * factor + rent;
+      
+          // Return the total to the client using the provided callback function
+          callback(total);
+        } catch (error) {
+          console.error(error);
+          callback(0); // Return 0 to the client in case of an error
+        }
+      });
+
     //socket on client disconnect
     socket.on("disconnect", () => {
 
@@ -246,9 +267,26 @@ io.on("connection", (socket) => {
 
 })
 
+async function getfactor() {
+    console.log("calculating factor");
+    const apiKey = '9179c0f0f66c44909ffeb3444ab800dc';
+    const fromCurrency = 'SAR';
+    const toCurrency = 'KES';
 
-async function startAction(data)
-{
+    const response = await fetch(`https://openexchangerates.org/api/latest.json?app_id=${apiKey}&symbols=${toCurrency},${fromCurrency}`);
+    const data = await response.json();
+
+    if (data.error) {
+        throw new Error(`Error: ${data.error.message}`);
+    }
+
+    let factor= data.rates[fromCurrency] * 10;
+    console.log(this.shlingFactor)
+    return factor;
+
+}
+
+async function startAction(data) {
     console.log("got the emit")
     let date = data.date;
     let abaa = data.abaa
@@ -266,8 +304,8 @@ async function startAction(data)
         rent: 0,
         cash: 0,
         cashShling: 0,
-        abaaPercentage: 0,
-        umiPercentage: 0,
+        abaaLoneDecrease: 0,
+        umiLoneDecrease: 0,
         total: 0,
         abaaOut: 0,
         umiOut: 0,
@@ -275,10 +313,35 @@ async function startAction(data)
         umiTotal: 0,
         remainingAbaa: abaa,
         remainingUmi: umi,
-        remainingTotal: abaa+umi,
+        remainingTotal: abaa + umi,
         shlingFactor: 0,
         date: date
     });
     let save = await newAction.save()
     console.log("action has started")
+}
+
+async function startLoan(data) {
+    console.log("got the emit")
+    let date = data.date;
+    let omar = data.omar
+    let rageeb = data.rageeb
+
+
+    let umi = 0
+    if (data.umi)
+        umi = data.umi
+    let abaa = 0
+    if (data.abaa)
+        abaa = data.abaa
+    let umiSource = ""
+    if (data.umiSource)
+        umiSource = data.umiSource
+    let abaaSource = ""
+    if (data.abaaSource)
+        abaaSource = data.abaaSource
+
+
+    let newLoan = loan(date, omar, rageeb, umi, umiSource, abaa, abaaSource)
+
 }
