@@ -243,7 +243,7 @@ section .signin .content .form
   position: relative;
   width: 100%;
 }
- .inputBox input 
+ .inputBox input, .inputBox select
 {
   position: relative;
   width: 100%;
@@ -254,8 +254,9 @@ section .signin .content .form
   border-radius: 4px;
   color: #fff;
   font-weight: 500;
-  font-size: 1em;
+  
 }
+
  .inputBox i 
 {
   position: absolute;

@@ -80,7 +80,25 @@
                         </div>
                         <div class="inputBox">
 
-                            <input type="text" name="" id="abaaSource"> <i>F in source</i>
+                            <select name="source" id="abaaSource" value="Abaa source">
+                                <option value="" disabled selected>Select Abaa source</option>
+                                <option value="Abaa">Abaa</option>
+                                <option value="Umi">Umi</option>
+                                <option value="Swafia">Swafia</option>
+                                <option value="UAE">UAE</option>
+                                <option value="house">house</option>
+
+                            </select>
+
+                        </div>
+                        <div class="inputBox">
+
+
+                            <select name="source" id="abaaTo" value="Abaa source">
+                                <option value="" disabled selected>Select Abaa To</option>
+                                <option value="omar">Omar</option>
+                                <option value="rageeb">Rageeb</option>
+                            </select>
 
                         </div>
                         <div class="inputBox">
@@ -90,7 +108,26 @@
                         </div>
                         <div class="inputBox">
 
-                            <input type="text" name="" id="umiSource"> <i>m in source</i>
+
+                            <select name="source" id="umiSource" value="Abaa source">
+                                <option value="" disabled selected>Select Umi source</option>
+                                <option value="Abaa">Abaa</option>
+                                <option value="Umi">Umi</option>
+                                <option value="Swafia">Swafia</option>
+                                <option value="UAE">UAE</option>
+                                <option value="House">house</option>
+
+                            </select>
+
+                        </div>
+                        <div class="inputBox">
+
+
+                            <select name="source" id="umiTo" value="Abaa source">
+                                <option value="" disabled selected>Select Umi To</option>
+                                <option value="omar">Omar</option>
+                                <option value="rageeb">Rageeb</option>
+                            </select>
 
                         </div>
 
@@ -157,10 +194,10 @@
         const storedUsername = localStorage.getItem("username");
         if (storedUsername !== null) {
             username = storedUsername;
-            if(localStorage.getItem("username")=="admin")
-            document.getElementById("cashout").style.display="none"
-            else if (localStorage.getItem("username")=="user")
-            document.getElementById("cashin").style.display="none"
+            if (localStorage.getItem("username") == "admin")
+                document.getElementById("cashout").style.display = "none"
+            else if (localStorage.getItem("username") == "user")
+                document.getElementById("cashin").style.display = "none"
         }
         socket.emit("checkuser", username)
 
@@ -262,17 +299,17 @@
                 });
             });
 
-            console.log("the total is "+total)
+            console.log("the total is " + total)
             if (total < (abaaLoan + umiLoan)) {
                 alert("you can't give more than the total income from cash and rent which is " + total)
                 return
             }
-            let outSource=""
+            let outSource = ""
             if (document.getElementById('outSource').value !== null && document.getElementById("outSource").value !== "")
-            outSource = document.getElementById('outSource').value
+                outSource = document.getElementById('outSource').value
             console.log(outSource)
 
-            socket.emit("addAction", { abaaSource, umiSource, date, abaaIn, umiIn, Cash, rent, abaaLoan, umiLoan, UmiOut, AbaaOut, projectOwner,outSource})
+            socket.emit("addAction", { abaaSource, umiSource, date, abaaIn, umiIn, Cash, rent, abaaLoan, umiLoan, UmiOut, AbaaOut, projectOwner, outSource })
 
         })
 
@@ -292,6 +329,8 @@
             let AbaaOut = 0
             let abaaSource = ""
             let umiSource = ""
+            let abaaTo = ""
+            let umiTo = ""
             if (document.getElementById("abaa").value !== null && document.getElementById("abaa").value !== "")
                 abaaIn = parseFloat(document.getElementById("abaa").value)
             if (document.getElementById("umi").value !== null && document.getElementById("umi").value !== "")
@@ -300,9 +339,14 @@
                 abaaSource = document.getElementById('abaaSource').value
             if (document.getElementById('umiSource').value !== null && document.getElementById("umiSource").value !== "")
                 umiSource = document.getElementById('umiSource').value
+            if (document.getElementById('abaaTo').value !== null && document.getElementById("abaaTo").value !== "")
+            abaaTo = document.getElementById('abaaTo').value
+            
+            if (document.getElementById('umiTo').value !== null && document.getElementById("umiTo").value !== "")
+            umiTo = document.getElementById('umiTo').value
 
 
-            socket.emit("addAction", { abaaSource, umiSource, date, abaaIn, umiIn, Cash, rent, abaaLoan, umiLoan, UmiOut, AbaaOut, projectOwner })
+            socket.emit("addAction", { umiTo,abaaTo,abaaSource, umiSource, date, abaaIn, umiIn, Cash, rent, abaaLoan, umiLoan, UmiOut, AbaaOut, projectOwner })
 
         })
         // document.getElementById("together").addEventListener("click", () => {

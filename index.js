@@ -15,7 +15,7 @@ const statment = require("./classes/statment.js")
 const Action = require("./module/actions.js")
 const loans = require("./module/loans.js")
 const loanAction = require("./module/loanAction.js")
-
+const Loan = require("./classes/Loan.js")
 
 connect()
 async function connect() {
@@ -179,12 +179,14 @@ io.on("connection", (socket) => {
         let abaaLoneDecrease = data.abaaLoan
         let umiLoneDecrease = data.umiLoan
         let outSource = data.outSource
-
         let UmiOut = data.UmiOut
         let AbaaOut = data.AbaaOut
         let projectOwner = data.projectOwner
         let abaaSource = data.abaaSource
         let umiSource = data.umiSource
+        let umiTo = data.umiTo
+        let abaaTo = data.abaaTo
+
         console.log("umi decrese is  ", umiLoneDecrease)
         //retrive the project from the database that has name of projectowner
         let owner = {};
@@ -232,6 +234,57 @@ io.on("connection", (socket) => {
         catch (error) {
             console.log(error)
         }
+
+        //get the privous action loans
+        try {
+            let omarLoan = await loanAction.find({ loaner: "omar", project: projectOwner })
+            let rageebLoan = await loanAction.find({ loaner: "rageeb", project: projectOwner })
+            console.log("omar is "+ omarLoan)
+            console.log("rageeb is "+ rageebLoan)
+            //making the action of the loan
+            console.log("in try umi to is "+umiTo+" abaa to is "+abaaTo)
+            if (umiTo === abaaTo&&umiTo==="omar") {
+                let pay = new Loan(omarLoan[omarLoan.length-1].remaining, omarLoan[omarLoan.length-1].abaa, omarLoan[omarLoan.length-1].umi, omarLoan[omarLoan.length-1].UAE, omarLoan[omarLoan.length-1].house, omarLoan[omarLoan.length-1].swafia, abaaIn, umiIn, abaaSource, umiSource, "omar",projectOwner,date1)
+               
+                let store = await storeActionLoan(pay)
+            }
+            else if (umiTo === abaaTo&&umiTo==="rageeb")
+            {
+                let pay = new Loan(rageebLoan[rageebLoan.length-1].remaining, rageebLoan[rageebLoan.length-1].abaa, rageebLoan[rageebLoan.length-1].umi, rageebLoan[rageebLoan.length-1].UAE, rageebLoan[rageebLoan.length-1].house, rageebLoan[rageebLoan.length-1].swafia, abaaIn, umiIn, abaaSource, umiSource, "rageeb",projectOwner,date1)
+                let store = await storeActionLoan(pay)
+            }
+            else if (umiTo!==abaaTo)
+            {
+                if(umiTo==="omar")
+                {
+                    let pay = new Loan(omarLoan[omarLoan.length-1].remaining, omarLoan[omarLoan.length-1].abaa, omarLoan[omarLoan.length-1].umi, omarLoan[omarLoan.length-1].UAE, omarLoan[omarLoan.length-1].house, omarLoan[omarLoan.length-1].swafia, 0, umiIn, "", umiSource, "omar",projectOwner,date1)
+                   
+                    let store = await storeActionLoan(pay)
+                }
+                else if (umiTo==="rageeb")
+                {
+                    let pay = new Loan(rageebLoan[rageebLoan.length-1].remaining, rageebLoan[rageebLoan.length-1].abaa, rageebLoan[rageebLoan.length-1].umi, rageebLoan[rageebLoan.length-1].UAE, rageebLoan[rageebLoan.length-1].house, rageebLoan[rageebLoan.length-1].swafia, 0, umiIn, "", umiSource, "rageeb",projectOwner,date1)
+                   
+                    let store = await storeActionLoan(pay)
+                }
+                if(abaaTo==="omar")
+                {
+                    let pay = new Loan(omarLoan[omarLoan.length-1].remaining, omarLoan[omarLoan.length-1].abaa, omarLoan[omarLoan.length-1].umi, omarLoan[omarLoan.length-1].UAE, omarLoan[omarLoan.length-1].house, omarLoan[omarLoan.length-1].swafia, abaaIn, 0, abaaSource, "", "omar",projectOwner,date1)
+                   
+                    let store = await storeActionLoan(pay)
+                }
+                else if (abaaTo==="rageeb")
+                {
+                    let pay = new Loan(rageebLoan[rageebLoan.length-1].remaining, rageebLoan[rageebLoan.length-1].abaa, rageebLoan[rageebLoan.length-1].umi, rageebLoan[rageebLoan.length-1].UAE, rageebLoan[rageebLoan.length-1].house, rageebLoan[rageebLoan.length-1].swafia, abaaIn, 0, abaaSource, "", "rageeb",projectOwner,date1)
+                   
+                    let store = await storeActionLoan(pay)
+                }
+            }
+        }
+        catch (error) {
+            console.log(error)
+        }
+
 
 
     })
@@ -347,47 +400,77 @@ async function startLoan(data) {
     });
     let save = await rageebLoan.save()
     save = await omarLoan.save()
- 
-    await StartLoanAction({date,loaner:"omar",startLoan:omar,project})
-    await StartLoanAction({date,loaner:"rageeb",startLoan:rageeb,project})
+
+    await StartLoanAction({ date, loaner: "omar", startLoan: omar, project })
+    await StartLoanAction({ date, loaner: "rageeb", startLoan: rageeb, project })
 
 }
 
-async function StartLoanAction(data){
+async function StartLoanAction(data) {
     let date = data.date;
     let loaner = data.loaner
-    let startingLoan= data.startLoan
+    let startingLoan = data.startLoan
     let project = data.project
-    let umi=0
-    let abaa=0
-    let swafia=0
-    let UAE=0
-    let house=0
-    if(data.umi)
-    umi=data.umi
-    if(data.abaa)
-    abaa=data.abaa
-    if(data.swafia)
-    swafia=data.swafia
-    if(data.UAE)
-    UAE=data.UAE
-    if(data.house)
-    house=data.house
+    let umi = 0
+    let abaa = 0
+    let swafia = 0
+    let UAE = 0
+    let house = 0
+    if (data.umi)
+        umi = data.umi
+    if (data.abaa)
+        abaa = data.abaa
+    if (data.swafia)
+        swafia = data.swafia
+    if (data.UAE)
+        UAE = data.UAE
+    if (data.house)
+        house = data.house
 
     let newLoanAction = new loanAction({
-        project:project,
-        loaner:loaner,
-        date:date,
-        startingLoan:startingLoan,
-        umi:umi,
-        paid:0,
-        abaa:abaa,
-        house:house,
-        UAE:UAE,
-        swafia:swafia,
-        total:0,
-        remaining:startingLoan    
+        project: project,
+        loaner: loaner,
+        date: date,
+        startingLoan: startingLoan,
+        umi: umi,
+        paid: 0,
+        abaa: abaa,
+        house: house,
+        UAE: UAE,
+        swafia: swafia,
+        total: 0,
+        remaining: startingLoan
     })
     let save = await newLoanAction.save()
 }
 
+async function  storeActionLoan(pay)
+{
+    console.log("in saving")
+    let done = await pay.calculateRemaining(pay.Pay1,pay.Pay2,pay.Pay1Source,pay.Pay2Source,pay.totalAbaa,pay.totalUmi,pay.totalUAE,pay.totalhouse,pay.totalSwafia)
+    let newLoanAction = new loanAction({
+        project: pay.projectOwner,
+        loaner: pay.loaner,
+        date:pay.date,
+        startingLoan: pay.originalLoan,
+        umi: pay.totalUmi,
+        paid: pay.totalPay,
+        abaa: pay.totalAbaa,
+        house: pay.totalhouse,
+        UAE: pay.totalUAE,
+        swafia: pay.totalSwafia,
+        total: pay.total,
+        remaining: pay.remaining
+    })
+
+    try
+    {
+        let save = await newLoanAction.save()
+    }
+    catch(error )
+    {
+        console.log(error)
+    }
+    return true
+}
+   
