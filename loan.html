@@ -1,10 +1,301 @@
 <html>
-    <head>
-        
-    </head>
 
-    <body>
-        
+<head>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="styles/statment.css">
+</head>
 
-    </body>
+<body>
+
+    <section> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
+        <span></span> <span></span> <span></span> <span></span> <span></span>
+
+        <div class="header">
+            <a href="New.html" class="btn">project</a>
+            <a href="action.html" class="btn">Cash in /Cash out</a>
+            <a href="statment.html" class="btn">Statment</a>
+            <a href="loan.html" class="btn">Loans</a>
+            <a href="index.html" class="btn">Logout</a>
+        </div>
+
+        <div class="signin">
+            <div style="display: flex; flex-direction: column;align-items: center;">
+                <h1 style="color: rgb(0, 248, 0) ;">select a loan</h1>
+                <br><br>
+                <div id="choice">
+
+                </div>
+                <br><br>
+                <button id="project">submit</button>
+                <br><br>
+                <div class="inputbtn" style="display: none;" id="buttons">
+                    <button id="create">Omar</button>
+                    <h3 id="loanname" style="color: rgb(0, 248, 0) ;"></h3>
+                    <button id="delete">Rageeb</button>
+                </div>
+
+                <br><br>
+
+                <form action="" id="form" style="display: none;">
+                    <div id="statment">
+
+                    </div>
+                    <button id="resources">Show Resources</button>
+                    <div id="resourceschedual" style="display: none;">
+
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+    </section>
+
+    <script>
+        const socket = io()
+        let username = "";
+        const storedUsername = localStorage.getItem("username");
+        if (storedUsername !== null) {
+            username = storedUsername;
+        }
+        socket.emit("checkuser", username)
+
+        socket.on("goLogin", (path) => {
+            //locate the user to the path
+            window.location = `./${path}`;
+        })
+
+        socket.emit("getProjects")
+        socket.on("sendProjects", (projects) => {
+            project = projects;
+            console.log('sending projects');
+            let selectElement = document.createElement("select");
+            selectElement.setAttribute("id", "projectSelect");
+
+            for (let i = 0; i < projects.length; i++) {
+                let optionElement = document.createElement("option");
+                optionElement.textContent = projects[i].project;
+                selectElement.appendChild(optionElement);
+            }
+
+            let choiceDiv = document.getElementById("choice");
+            choiceDiv.innerHTML = "";
+            choiceDiv.appendChild(selectElement);
+        });
+
+
+        //display forms
+        document.getElementById("project").addEventListener("click", () => {
+            document.getElementById("buttons").style.display = "flex";
+            document.getElementById("loanname").innerHTML = document.getElementById("projectSelect").value + " project"
+
+        })
+        //display forms and request the schedual info
+        document.getElementById("create").addEventListener("click", () => {
+            document.getElementById("form").style.display = "flex";
+            socket.emit("getLoanAction", ({ loaner: "omar", project: document.getElementById("projectSelect").value }))
+
+        })
+        document.getElementById("delete").addEventListener("click", () => {
+            document.getElementById("form").style.display = "flex"
+            socket.emit("getLoanAction", { loaner: "rageeb", project: document.getElementById("projectSelect").value })
+        })
+        let check = false
+        document.getElementById("resources").addEventListener("click", () => {
+
+            event.preventDefault()
+            if (!check) {
+                check = true
+                document.getElementById("resourceschedual").style.display = "block"
+                document.getElementById("resources").innerHTML = "Hide Resources"
+            }
+
+            else {
+                check = false
+                document.getElementById("resourceschedual").style.display = "none"
+                document.getElementById("resources").innerHTML = "Show Resources"
+            }
+
+
+        })
+
+        //reseve schedual info
+        socket.on("sendLoanAction", (projects) => {
+            let project = projects;
+            let statementDiv = document.getElementById("statment");
+            statementDiv.innerHTML = ""; // clear the contents of the statement div
+
+            // create a table element
+            let tableElement = document.createElement("table");
+
+            // create a table row for the table header
+            let headerRow = document.createElement("tr");
+            let keysToInclude2 = ["Loan", "Paid", "Remaining", "Date"];
+            for (let i = 0; i < keysToInclude2.length; i++) {
+                let headerCell = document.createElement("th");
+                headerCell.textContent = keysToInclude2[i];
+                headerRow.appendChild(headerCell);
+            }
+            tableElement.appendChild(headerRow);
+            //specify the nassasry colomns
+            let keysToInclude = ["StartingLoan", "paid", "remaining", "date"];
+            // create a table row for each object in the project list
+            console.log(project[project.length - 1].outSource)
+
+            for (let i =  0; i < project.length; i++) {
+                let dataRow = document.createElement("tr");
+                for (let j = 0; j < keysToInclude.length; j++) {
+                    let dataCell = document.createElement("td");
+                    dataCell.textContent = project[i][keysToInclude[j]];
+                    dataRow.appendChild(dataCell);
+                }
+                tableElement.appendChild(dataRow);
+            }
+
+            statementDiv.appendChild(tableElement);
+
+
+            //create the resource table 
+            statementDiv = document.getElementById("resourceschedual");
+            statementDiv.innerHTML = ""; // clear the contents of the statement div
+            // create a table element
+             tableElement = document.createElement("table");
+
+            // create a table row for the table header
+             headerRow = document.createElement("tr");
+             keysToInclude2 = ["Abaa", "Umi", "Swafia", "House","UAE","Total"];
+            for (let i = 0; i < keysToInclude2.length; i++) {
+                let headerCell = document.createElement("th");
+                headerCell.textContent = keysToInclude2[i];
+                headerRow.appendChild(headerCell);
+            }
+            tableElement.appendChild(headerRow);
+            //specify the nassasry colomns
+             keysToInclude = ["abaa", "umi", "swafia", "house","UAE","total"];
+            // create a table row for each object in the project list
+            console.log(project[project.length - 1].outSource)
+
+            for (let i = project.length-1; i < project.length; i++) {
+                let dataRow = document.createElement("tr");
+                for (let j = 0; j < keysToInclude.length; j++) {
+                    let dataCell = document.createElement("td");
+                    dataCell.textContent = project[i][keysToInclude[j]];
+                    dataRow.appendChild(dataCell);
+                }
+                tableElement.appendChild(dataRow);
+            }
+
+            statementDiv.appendChild(tableElement);
+
+        })
+
+
+
+        //getting the values
+        document.getElementById("Submit").addEventListener("click", () => {
+
+            event.preventDefault()
+            let abaaLoan = 0
+            let umiLoan = 0
+            let rageebLoan = 0
+            let omarLoan = 0
+            let projectname = ""
+            let date = ""
+
+
+            let abaa = document.getElementById("abaaLoan").value
+            let umi = document.getElementById("aishaLoan").value
+            let rageeb = document.getElementById("rageebLoan").value
+            let omar = document.getElementById("omarLoan").value
+            let project = document.getElementById("projectName").value
+            let datee = document.getElementById("date").value
+
+            if (abaa !== null && abaa !== "")
+                abaaLoan = parseInt(abaa)
+            if (umi !== null && umi !== "")
+                umiLoan = parseInt(umi)
+            if (rageeb !== null && rageeb !== "")
+                rageebLoan = parseInt(rageeb)
+            if (omar !== null && omar !== "")
+                omarLoan = parseInt(omar)
+            if (project != null)
+                projectname = project
+            else {
+                alert("project name cannot be empty")
+                return;
+            }
+            if (datee != null)
+                date = datee
+            else {
+                alert("date cannot be empty")
+                return;
+            }
+
+
+            console.log(umiLoan)
+            socket.emit("storeProject", { abaaLoan, umiLoan, projectname, date, rageebLoan, omarLoan })
+            socket.once("projectRespones", (message) => {
+
+                alert(message)
+                return
+            })
+
+        })
+
+        document.getElementById("Submit2").addEventListener("click", () => {
+            event.preventDefault();
+
+            let project = ""
+            if (document.getElementById("projectName2").value == null) {
+                alert("project name connot be empty")
+                return
+            }
+
+            else
+                project = document.getElementById("projectName2").value
+
+            socket.emit("removeProject", project)
+            socket.once("projectRespones", (message) => {
+
+                alert(message)
+                return
+            })
+
+        })
+
+
+    </script>
+</body>
+
 </html>

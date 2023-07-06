@@ -21,45 +21,45 @@ class Loan {
          this.totalPay=Pay1+Pay2
          if(Pay1Source=="Abaa")
          {
-            this.totalAbaa+=totalAbaa
+            this.totalAbaa+=Pay1
          }
          else if (Pay1Source=="Umi")
          {
-            this.totalUmi+=totalUmi
+            this.totalUmi+=Pay1
          }
          else if (Pay1Source=="UAE")
          {
-                this.totalUAE+=totalUAE
+                this.totalUAE+=Pay1
          }
          else if (Pay1Source=="Swafia")
          {
-            this.totalSwafia+=totalSwafia
+            this.totalSwafia+=Pay1
          }
-         else if (Pay1Source=="House")
+         else if (Pay1Source=="house")
          {
-            this.totalhouse+=totalhouse
+            this.totalhouse+=Pay1
          }
 
 
          if(Pay2Source=="Abaa")
          {
-            this.totalAbaa+=totalAbaa
+            this.totalAbaa+=Pay2
          }
          else if (Pay2Source=="Umi")
          {
-            this.totalUmi+=totalUmi
+            this.totalUmi+=Pay2
          }
          else if (Pay2Source=="UAE")
          {
-            this.totalUAE+=totalUAE
+            this.totalUAE+=Pay2
          }
          else if (Pay2Source=="Swafia")
          {
-            this.totalSwafia+=totalSwafia
+            this.totalSwafia+=Pay2
          }
-         else if (Pay2Source=="House")
+         else if (Pay2Source=="house")
          {
-            this.totalhouse+=totalhouse
+            this.totalhouse+=Pay2
          }
 
          this.total=this.totalhouse+this.totalSwafia+this.totalUAE+this.totalUmi+this.totalAbaa

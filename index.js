@@ -66,6 +66,10 @@ app.get("/statment.html", function (req, res) {
     res.sendFile(__dirname + "/statment.html");
 });
 
+app.get("/loan.html", function (req, res) {
+    res.sendFile(__dirname + "/loan.html");
+});
+
 
 
 io.on("connection", (socket) => {
@@ -244,6 +248,7 @@ io.on("connection", (socket) => {
             //making the action of the loan
             console.log("in try umi to is "+umiTo+" abaa to is "+abaaTo)
             if (umiTo === abaaTo&&umiTo==="omar") {
+                console.log("from socket abaasource is "+ abaaSource+" and umiSource is "+umiSource)
                 let pay = new Loan(omarLoan[omarLoan.length-1].remaining, omarLoan[omarLoan.length-1].abaa, omarLoan[omarLoan.length-1].umi, omarLoan[omarLoan.length-1].UAE, omarLoan[omarLoan.length-1].house, omarLoan[omarLoan.length-1].swafia, abaaIn, umiIn, abaaSource, umiSource, "omar",projectOwner,date1)
                
                 let store = await storeActionLoan(pay)
@@ -316,6 +321,20 @@ io.on("connection", (socket) => {
             callback(0); // Return 0 to the client in case of an error
         }
     });
+
+    socket.on("getLoanAction", async(data) => {
+
+       let loaner=data.loaner
+       let project=data.project
+
+       try{
+        let actions= await loanAction.find({loaner:loaner,project:project})
+        console.log(actions)
+        socket.emit("sendLoanAction",actions)
+       }catch(error){
+        console.log(error)
+       }
+    })
 
     //socket on client disconnect
     socket.on("disconnect", () => {
@@ -431,7 +450,7 @@ async function StartLoanAction(data) {
         project: project,
         loaner: loaner,
         date: date,
-        startingLoan: startingLoan,
+        StartingLoan: startingLoan,
         umi: umi,
         paid: 0,
         abaa: abaa,
@@ -447,12 +466,13 @@ async function StartLoanAction(data) {
 async function  storeActionLoan(pay)
 {
     console.log("in saving")
+    console.log("from function abaasource is "+ pay.Pay1Source+" and umiSource is "+pay.Pay2Source)
     let done = await pay.calculateRemaining(pay.Pay1,pay.Pay2,pay.Pay1Source,pay.Pay2Source,pay.totalAbaa,pay.totalUmi,pay.totalUAE,pay.totalhouse,pay.totalSwafia)
     let newLoanAction = new loanAction({
         project: pay.projectOwner,
         loaner: pay.loaner,
         date:pay.date,
-        startingLoan: pay.originalLoan,
+        StartingLoan: pay.originalLoan,
         umi: pay.totalUmi,
         paid: pay.totalPay,
         abaa: pay.totalAbaa,
