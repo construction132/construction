@@ -86,9 +86,12 @@ body{
    
 }
 
+
+
 table {
     border-collapse: collapse;
     border-spacing: 0; /* optional, sets the space between adjacent cells */
+    font-size: 10pt;
   }
   
   th, tr {

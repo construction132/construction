@@ -39,27 +39,27 @@
         <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
         <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span>
         <span></span> <span></span> <span></span> <span></span> <span></span>
-    <div class="header">
-        <a href="New.html" class="btn">project</a>
-        <a href="action.html" class="btn">Cash in /Cash out</a>
-        <a href="statment.html" class="btn">Statment</a>
-        <a href="loan.html" class="btn">Loans</a>
-        <a href="index.html" class="btn">Logout</a>
-    </div>
+        <div class="header">
+            <a href="New.html" class="btn">project</a>
+            <a href="action.html" class="btn">Cash in /Cash out</a>
+            <a href="statment.html" class="btn">Statment</a>
+            <a href="loan.html" class="btn">Loans</a>
+            <a href="index.html" class="btn">Logout</a>
+        </div>
 
-    <div class="signin">
-        <h1>select a project</h1>
-        <div id="choice"></div>
-        <br>
-        <button id="Submit">Submit</button>
-        <div id="statment" >
-           
+        <div class="signin">
+            <h1>select a project</h1>
+            <div id="choice"></div>
+            <br>
+            <button id="Submit">Submit</button>
+            <div id="statment">
+            </div>
+            <div id="statment2">
+
+            </div>
+            <button id="delete" style="display: none;">Delete Last Action</button>
         </div>
-        <div id="statment2">
-           
-        </div>
-    </div>
-    
+
     </section>
     <script>
         const socket = io()
@@ -67,10 +67,10 @@
         const storedUsername = localStorage.getItem("username");
         if (storedUsername !== null) {
             username = storedUsername;
-            if(localStorage.getItem("username")=="admin")
-                document.getElementById("statment2").style.display="none"
-            else if (localStorage.getItem("username")=="user")
-                document.getElementById("statment").style.display="none"
+            if (localStorage.getItem("username") == "admin")
+                document.getElementById("statment2").style.display = "none"
+            else if (localStorage.getItem("username") == "user")
+                document.getElementById("statment").style.display = "none"
         }
         socket.emit("checkuser", username)
 
@@ -82,6 +82,7 @@
         let project = null
         socket.emit("getProjects")
         socket.on("sendProjects", (projects) => {
+
             project = projects;
             console.log('sending projects');
             let selectElement = document.createElement("select");
@@ -105,19 +106,17 @@
         });
 
         socket.on("sendActions", (actions) => {
+            console.log("in send actions")
             project = actions;
             let statementDiv = document.getElementById("statment");
             statementDiv.innerHTML = ""; // clear the contents of the statement div
 
             // create a table element
             let tableElement = document.createElement("table");
-
+            tableElement.id = "detailTable"
             // create a table row for the table header
             let headerRow = document.createElement("tr");
-            let objectKeys = Object.keys(project[0]); // get the keys of the first object in the project list
-            objectKeys = objectKeys.slice(1, -1);
-            console.log(objectKeys)
-            let keysToInclude2 = ["N", "abaa Loan", "umi Loan", "abaa In","abaa Source", "umi In","umi Source", "rent", "cash", "cash Shling", "total", "abaa Out", "umi Out","out Source", "abaa Total", "umi Total", "remaining Abaa", "remaining Umi", "remaining Total", "date"];
+            let keysToInclude2 = ["N", "abaa Loan", "umi Loan", "abaa In", "abaa Source", "umi In", "umi Source", "rent", "cash", "cash Shling", "total", "abaa Out", "umi Out", "out Source", "abaa Total", "umi Total", "remaining Abaa", "remaining Umi", "remaining Total", "date"];
             for (let i = 0; i < keysToInclude2.length; i++) {
                 let headerCell = document.createElement("th");
                 headerCell.textContent = keysToInclude2[i];
@@ -125,10 +124,10 @@
             }
             tableElement.appendChild(headerRow);
             //specify the nassasry colomns
-            let keysToInclude = ["actionNumber", "abaaLoan", "umiLoan", "abaaIn","abaaSource", "umiIn","umiSource", "rent", "cash", "cashShling", "total", "abaaOut", "umiOut" ,"outSource", "abaaTotal", "umiTotal", "remainingAbaa", "remainingUmi", "remainingTotal", "date"];
+            let keysToInclude = ["actionNumber", "abaaLoan", "umiLoan", "abaaIn", "abaaSource", "umiIn", "umiSource", "rent", "cash", "cashShling", "total", "abaaOut", "umiOut", "outSource", "abaaTotal", "umiTotal", "remainingAbaa", "remainingUmi", "remainingTotal", "date"];
             // create a table row for each object in the project list
-            console.log(project[project.length-1].outSource)
-           
+            console.log(project[project.length - 1].outSource)
+
             for (let i = 0; i < project.length; i++) {
                 let dataRow = document.createElement("tr");
                 for (let j = 0; j < keysToInclude.length; j++) {
@@ -140,18 +139,245 @@
             }
 
             statementDiv.appendChild(tableElement);
+            let space = document.createElement("br")
+            statementDiv.appendChild(space)
+            const btn = document.createElement("button")
+            btn.id = "summaryBtn"
+            btn.innerHTML = "Show Summary";
+            statementDiv.appendChild(btn);
+            if (localStorage.getItem("username") === "admin") {
+                statementDiv.style.display = "flex"
+                statementDiv.style.flexDirection = "column"
+                statementDiv.style.justifyContent = "center"
+                statementDiv.style.alignItems = "center"
+                editabletable()
+            }
+            else {
+                statementDiv.style.display = "none"
+            }
+
+            // create a table element
+            tableElement = document.createElement("table");
+            tableElement.id = "summaryTable"
+            statementDiv = document.getElementById("statment2");
+            statementDiv.innerHTML = ""; // clear the contents of the statement div
+            // create a table row for the table header
+            headerRow = document.createElement("tr");
+            objectKeys = Object.keys(project[0]); // get the keys of the first object in the project list
+            objectKeys = objectKeys.slice(1, -1);
+            console.log(objectKeys)
+            keysToInclude2 = ["N", "totsal", "remaining Abaa", "remaining Umi", "remaining Total", "date"];
+            for (let i = 0; i < keysToInclude2.length; i++) {
+                let headerCell = document.createElement("th");
+                headerCell.textContent = keysToInclude2[i];
+                headerRow.appendChild(headerCell);
+            }
+            tableElement.appendChild(headerRow);
+            //specify the nassasry colomns
+            keysToInclude = ["actionNumber", "total", "remainingAbaa", "remainingUmi", "remainingTotal", "date"];
+            // create a table row for each object in the project list
+            for (let i = 0; i < project.length; i++) {
+                let dataRow = document.createElement("tr");
+                for (let j = 0; j < keysToInclude.length; j++) {
+                    let dataCell = document.createElement("td");
+                    dataCell.textContent = project[i][keysToInclude[j]];
+                    dataRow.appendChild(dataCell);
+                }
+                tableElement.appendChild(dataRow);
+            }
+            statementDiv.appendChild(tableElement);
+            const btn2 = document.createElement("button")
+            statementDiv.appendChild(space)
+            btn2.id = "detailsBtn"
+            btn2.innerHTML = "Show Details";
+            statementDiv.appendChild(btn2);
+            if (localStorage.getItem("username") === "user") {
+                statementDiv.style.display = "flex"
+                statementDiv.style.flexDirection = "column"
+                statementDiv.style.justifyContent = "center"
+                statementDiv.style.alignItems = "center"
+            }
+            else {
+                console.log("in else")
+                statementDiv.style.display = "none"
+            }
+            document.getElementById("delete").style.display = "block"
+
+
+            let check = false
+            document.getElementById("detailsBtn").addEventListener("click", () => {
+                if (!check) {
+                    console.log("in if")
+                    document.getElementById("statment").style.display = "flex"
+                    document.getElementById("statment").style.flexDirection = "column"
+                    document.getElementById("statment").style.justifyContent = "center"
+                    document.getElementById("statment").style.alignItems = "center"
+                    document.getElementById("summaryBtn").style.display = "none"
+                    document.getElementById("detailsBtn").innerHTML = "Hide Details"
+                    check = true
+                    editabletable()
+
+
+
+                } else {
+                    console.log("in else")
+                    document.getElementById("statment").style.display = "none"
+                    document.getElementById("detailsBtn").innerHTML = "Show Details"
+                    check = false
+                }
+            })
+            document.getElementById("summaryBtn").addEventListener("click", () => {
+                if (!check) {
+                    console.log("in if")
+                    document.getElementById("statment2").style.display = "flex"
+                    document.getElementById("statment2").style.flexDirection = "column"
+                    document.getElementById("statment2").style.justifyContent = "center"
+                    document.getElementById("statment2").style.alignItems = "center"
+                    document.getElementById("detailsBtn").style.display = "none"
+                    document.getElementById("summaryBtn").innerHTML = "Hide Summury"
+                    check = true
+                } else {
+                    console.log("in else")
+                    document.getElementById("statment2").style.display = "none"
+                    document.getElementById("summaryBtn").innerHTML = "Show Summury"
+                    check = false
+                }
+            })
+        })
+
+        document.getElementById("delete").addEventListener("click", () => {
+
+            let selectElement = document.getElementById("projectSelect");
+            let selectedProject = selectElement.value;
+            socket.emit("deleteLastAction", selectedProject)
+        })
+        let check2 = false
+        function editabletable() {
+            console.log("in function")
+            let detailTable = document.getElementById("detailTable");
+            let cells = detailTable.getElementsByTagName("td");
+            let rows = [];
+            for (let i = 0; i < cells.length; i++) {
+                let cell = cells[i];
+                let content = cell.textContent.trim();
+
+                // Skip cells that shouldn't be editable
+                if (cell.querySelector("input, button") || content === "") {
+
+                    continue;
+                }
+
+                cell.addEventListener("dblclick", function () {
+
+                    let input = document.createElement("input");
+                    input.type = "text";
+                    input.value = content;
+                    input.className = "editable-cell";
+
+                    // Set the appropriate size and style for the input element
+                    input.style.width = cell.offsetWidth + "px";
+                    input.style.height = cell.offsetHeight + "px";
+                    input.style.fontSize = window.getComputedStyle(cell).getPropertyValue("font-size");
+
+                    // Replace the contents of the cell with the input element
+                    cell.innerHTML = "";
+                    cell.appendChild(input);
+
+                    // Select the contents of the input element
+                    input.select();
+
+                    // Add an event listener to the input element to listen for the blur event
+                    input.addEventListener("blur", () => {
+                        let newValue = input.value.trim();
+
+                        // If the new value is different from the old value, update the cell
+                        if (newValue !== content) {
+                            cell.textContent = newValue;
+
+                            // Update the corresponding row object
+                            let rowIndex = cell.parentNode.rowIndex - 1;
+                            let header = detailTable.getElementsByTagName("th");
+                            let row = {};
+
+                            for (let j = 0; j < header.length; j++) {
+                                let key = header[j].textContent.trim();
+                                let value = detailTable.rows[rowIndex + 1].cells[j].textContent.trim();
+                                row[key] = value;
+                            }
+
+                            rows[rowIndex] = row;
+
+                            // Print the row object to the console for debugging purposes
+                            console.log(row["abaa Out"]);
+                            row.projectOwner = document.getElementById("projectSelect").value
+                            socket.emit("editAction", row)
+                        } else {
+                            // If the new value is the same as the old value, restore the original content
+                            cell.textContent = content;
+                        }
+                    });
+                });
+            }
+        }
+
+
+
+
+        socket.on("sendUpdatedActions", (actions) => {
+            console.log("in update actions")
+            project = actions;
+            let statementDiv = document.getElementById("statment");
+            statementDiv.innerHTML = ""; // clear the contents of the statement div
+
+            // create a table element
+            let tableElement = document.createElement("table");
+            tableElement.id = "detailTable"
+            // create a table row for the table header
+            let headerRow = document.createElement("tr");
+            let keysToInclude2 = ["N", "abaa Loan", "umi Loan", "abaa In", "abaa Source", "umi In", "umi Source", "rent", "cash", "cash Shling", "total", "abaa Out", "umi Out", "out Source", "abaa Total", "umi Total", "remaining Abaa", "remaining Umi", "remaining Total", "date"];
+            for (let i = 0; i < keysToInclude2.length; i++) {
+                let headerCell = document.createElement("th");
+                headerCell.textContent = keysToInclude2[i];
+                headerRow.appendChild(headerCell);
+            }
+            tableElement.appendChild(headerRow);
+            //specify the nassasry colomns
+            let keysToInclude = ["actionNumber", "abaaLoan", "umiLoan", "abaaIn", "abaaSource", "umiIn", "umiSource", "rent", "cash", "cashShling", "total", "abaaOut", "umiOut", "outSource", "abaaTotal", "umiTotal", "remainingAbaa", "remainingUmi", "remainingTotal", "date"];
+            // create a table row for each object in the project list
+            console.log(project[project.length - 1].outSource)
+
+            for (let i = 0; i < project.length; i++) {
+                let dataRow = document.createElement("tr");
+                for (let j = 0; j < keysToInclude.length; j++) {
+                    let dataCell = document.createElement("td");
+                    dataCell.textContent = project[i][keysToInclude[j]];
+                    dataRow.appendChild(dataCell);
+                }
+                tableElement.appendChild(dataRow);
+            }
+
+            statementDiv.appendChild(tableElement);
+            let space = document.createElement("br")
+            statementDiv.appendChild(space)
+            const btn = document.createElement("button")
+            btn.id = "summaryBtn"
+            btn.innerHTML = "Show Summary";
+            if (localStorage.getItem("username") == "admin")
+                statementDiv.appendChild(btn);
+            editabletable()
 
 
             // create a table element
-             tableElement = document.createElement("table");
-              statementDiv = document.getElementById("statment2");
+            tableElement = document.createElement("table");
+            tableElement.id = "summaryTable"
+            statementDiv = document.getElementById("statment2");
             statementDiv.innerHTML = ""; // clear the contents of the statement div
             // create a table row for the table header
-             headerRow = document.createElement("tr");
-             objectKeys = Object.keys(project[0]); // get the keys of the first object in the project list
+            headerRow = document.createElement("tr");
+            objectKeys = Object.keys(project[0]); // get the keys of the first object in the project list
             objectKeys = objectKeys.slice(1, -1);
             console.log(objectKeys)
-             keysToInclude2 = ["N", "totsal", "remaining Abaa", "remaining Umi", "remaining Total", "date"];
+            keysToInclude2 = ["N", "totsal", "remaining Abaa", "remaining Umi", "remaining Total", "date"];
             for (let i = 0; i < keysToInclude2.length; i++) {
                 let headerCell = document.createElement("th");
                 headerCell.textContent = keysToInclude2[i];
@@ -159,7 +385,7 @@
             }
             tableElement.appendChild(headerRow);
             //specify the nassasry colomns
-             keysToInclude = ["actionNumber", "total", "remainingAbaa", "remainingUmi", "remainingTotal", "date"];
+            keysToInclude = ["actionNumber", "total", "remainingAbaa", "remainingUmi", "remainingTotal", "date"];
             // create a table row for each object in the project list
             for (let i = 0; i < project.length; i++) {
                 let dataRow = document.createElement("tr");
@@ -171,7 +397,127 @@
                 tableElement.appendChild(dataRow);
             }
             statementDiv.appendChild(tableElement);
+            const btn2 = document.createElement("button")
+            statementDiv.appendChild(space)
+            btn2.id = "detailsBtn"
+            btn2.innerHTML = "Hide Details";
+            statementDiv.appendChild(btn2);
+            document.getElementById("delete").style.display = "block"
+
+
+            let check2 = true
+            document.getElementById("detailsBtn").addEventListener("click", () => {
+
+                console.log("button has been clicked")
+                if (!check2) {
+                    console.log("in if")
+                    document.getElementById("statment").style.display = "flex"
+                    document.getElementById("statment").style.flexDirection = "column"
+                    document.getElementById("statment").style.justifyContent = "center"
+                    document.getElementById("statment").style.alignItems = "center"
+
+                    document.getElementById("detailsBtn").innerHTML = "Hide Details"
+                    check2 = true
+                    editabletable()
+
+
+
+                } else {
+                    console.log("in else")
+                    document.getElementById("statment").style.display = "none"
+                    document.getElementById("detailsBtn").innerHTML = "Show Details"
+                    check2 = false
+                }
+            })
+            document.getElementById("summaryBtn").addEventListener("click", () => {
+                if (!check2) {
+                    console.log("in if")
+                    document.getElementById("statment2").style.display = "flex"
+                    document.getElementById("statment2").style.flexDirection = "column"
+                    document.getElementById("statment2").style.justifyContent = "center"
+                    document.getElementById("statment2").style.alignItems = "center"
+
+                    document.getElementById("summaryBtn").innerHTML = "Hide Summuary"
+                    check2 = true
+                } else {
+                    console.log("in else")
+                    document.getElementById("statment2").style.display = "none"
+                    document.getElementById("summaryBtn").innerHTML = "Show Summuary"
+                    check2 = false
+                }
+            })
+
+
+
+            function editabletable() {
+                console.log("in function")
+                let detailTable = document.getElementById("detailTable");
+                let cells = detailTable.getElementsByTagName("td");
+                let rows = [];
+                for (let i = 0; i < cells.length; i++) {
+                    let cell = cells[i];
+                    let content = cell.textContent.trim();
+
+                    // Skip cells that shouldn't be editable
+                    if (cell.querySelector("input, button") || content === "") {
+
+                        continue;
+                    }
+
+                    cell.addEventListener("dblclick", function () {
+
+                        let input = document.createElement("input");
+                        input.type = "text";
+                        input.value = content;
+                        input.className = "editable-cell";
+
+                        // Set the appropriate size and style for the input element
+                        input.style.width = cell.offsetWidth + "px";
+                        input.style.height = cell.offsetHeight + "px";
+                        input.style.fontSize = window.getComputedStyle(cell).getPropertyValue("font-size");
+
+                        // Replace the contents of the cell with the input element
+                        cell.innerHTML = "";
+                        cell.appendChild(input);
+
+                        // Select the contents of the input element
+                        input.select();
+
+                        // Add an event listener to the input element to listen for the blur event
+                        input.addEventListener("blur", () => {
+                            let newValue = input.value.trim();
+
+                            // If the new value is different from the old value, update the cell
+                            if (newValue !== content) {
+                                cell.textContent = newValue;
+
+                                // Update the corresponding row object
+                                let rowIndex = cell.parentNode.rowIndex - 1;
+                                let header = detailTable.getElementsByTagName("th");
+                                let row = {};
+
+                                for (let j = 0; j < header.length; j++) {
+                                    let key = header[j].textContent.trim();
+                                    let value = detailTable.rows[rowIndex + 1].cells[j].textContent.trim();
+                                    row[key] = value;
+                                }
+
+                                rows[rowIndex] = row;
+
+                                // Print the row object to the console for debugging purposes
+                                console.log(row["abaa Out"]);
+                                row.projectOwner = document.getElementById("projectSelect").value
+                                socket.emit("editAction", row)
+                            } else {
+                                // If the new value is the same as the old value, restore the original content
+                                cell.textContent = content;
+                            }
+                        });
+                    });
+                }
+            }
         })
+
     </script>
 </body>
 

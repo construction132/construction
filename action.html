@@ -2,7 +2,7 @@
 
 <head>
     <script src="/socket.io/socket.io.js"></script>
-    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/statment.css">
 </head>
 
 <body>
@@ -228,7 +228,7 @@
 
 
         document.getElementById("Submit").addEventListener("click", () => {
-            document.getElementById("btns").style.display = "block"
+            document.getElementById("cashin/out").style.display = "block"
             //get the name from the select project
             let selectElement = document.getElementById("projectSelect");
             let selectedProject = selectElement.value;
@@ -399,6 +399,11 @@
         //     console.log(abaaSource)
         //     socket.emit("addAction", { abaaSource, umiSource, date, abaaIn, umiIn, Cash, rent, abaapercentage, umipercentage, UmiOut, AbaaOut, projectOwner })
         // })
+
+
+        socket.on("addedAction",(message)=>{
+            alert(message)
+        })
     </script>
     </section>
 </body>

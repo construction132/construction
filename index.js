@@ -198,6 +198,7 @@ io.on("connection", (socket) => {
             owner = await Action.find({ owner: projectOwner })
         } catch (err) {
             console.log("there is an error happened")
+            socket.emit("addedAction","an error happened while trying to add action")
             return
         }
 
@@ -237,6 +238,7 @@ io.on("connection", (socket) => {
         }
         catch (error) {
             console.log(error)
+            socket.emit("addedAction","an error happened while trying to add action")
         }
 
         //get the privous action loans
@@ -285,9 +287,11 @@ io.on("connection", (socket) => {
                     let store = await storeActionLoan(pay)
                 }
             }
+            socket.emit("addedAction","Action has been stored succsufully")
         }
         catch (error) {
             console.log(error)
+            socket.emit("addedAction","an error happened while trying to add action")
         }
 
 
@@ -335,6 +339,70 @@ io.on("connection", (socket) => {
         console.log(error)
        }
     })
+
+    socket.on("deleteLastAction", async(project) => {
+        
+        let actions = await Action.find({owner:project});
+        console.log("hey")
+        if (actions.length > 1) {
+            console.log("hey2")
+        let lastAction = actions.pop();
+        console.log("hey3")
+        try{
+            console.log("hey4")
+            await Action.deleteOne({ "actionNumber": lastAction.actionNumber });
+            console.log("hello")
+            socket.emit("sendActions", actions)
+        }catch(error){
+            console.log(error)
+        }
+       
+        }
+        
+    })
+
+    socket.on("editAction", async(data) => {
+        let actionNumber=data["N"]
+        let abaaLoan=data["abaa Loan"]
+        let umiLoan=data["umi Loan"]
+        let abaaIn= data["abaa In"]
+        let umiIn=data["umi In"]
+        let abaaSource =  data["abaa Source"]
+        let umiSource=data["umi Source"]
+        let rent = data["rent"]
+        let cash= data["cash"]
+        let cashShling= data["cash Shling"]
+        let total= data["total"]
+        let abaaOut= data["abaa Out"]
+        let umiOut= data["umi Out"]
+        let outSource= data["out Source"]
+        let abaaTotal= data["abaa Total"]
+        let umiTotal=data["umi Total"]
+        let remainingAbaa=data["remaining Abaa"]
+        let remainingUmi=data["remaining Umi"]
+        let remainingTotal=data["remaining Total"]
+        let date =data["date"]
+        let projectOwner=data["projectOwner"]
+        console.log(actionNumber)
+        let actions={}
+        try{
+            //get all the actions that bigger than or equal to the curruent action number 
+         actions= await Action.updateOne({owner:projectOwner ,actionNumber:actionNumber},{ $set: { abaaLoan: abaaLoan, umiLoan: umiLoan,abaaIn: abaaIn,umiIn: umiIn,abaaSource: abaaSource,umiSource: umiSource,rent: rent,cash: cash,cashShling: cashShling,total: total,abaaOut: abaaOut,umiOut: umiOut,outSource: outSource,abaaTotal: abaaTotal,umiTotal: umiTotal,remainingAbaa: remainingAbaa,remainingUmi: remainingUmi,remainingTotal: remainingTotal,date,date } })
+       
+        }catch(error){
+            console.log(error)
+        }
+
+        try{
+            let Actions= await Action.find({owner:projectOwner})
+            socket.emit("sendUpdatedActions",Actions)
+        
+        }catch(error){
+            console.log(error)
+        }
+        
+    })
+
 
     //socket on client disconnect
     socket.on("disconnect", () => {
