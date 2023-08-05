@@ -49,8 +49,8 @@
             <a href="index.html" class="btn">Logout</a>
         </div>
 
-        <div class="signin">
-            <div style="display: flex; flex-direction: column;align-items: center;">
+        <div class="signin" style="width: auto;">
+            <div style="display: flex; flex-direction: column;align-items: center;" style="width: auto;">
                 <h1 style="color: rgb(0, 248, 0) ;">select a loan</h1>
                 <br><br>
                 <div id="choice">
@@ -59,15 +59,20 @@
                 <br><br>
                 <button id="project">submit</button>
                 <br><br>
-                <div class="inputbtn" style="display: none;" id="buttons">
-                    <button id="create">Omar</button>
-                    <h3 id="loanname" style="color: rgb(0, 248, 0) ;"></h3>
-                    <button id="delete">Rageeb</button>
+                <h3 id="loanname" style="color: rgb(0, 248, 0) ;"></h3>
+                <div  id="btns" style="display: none;" >
+                    <button id="show">show loans</button>
+                    <button id="add">add loan</button>
                 </div>
-
+                <br>
+                <div class="inputbtn" style="display: none;" id="buttons" >
+        
+                </div>
+        
                 <br><br>
 
                 <form action="" id="form" style="display: none;">
+                    <h3 id="loaner3" style="color: rgb(0, 248, 0) ;"></h3>
                     <div id="statment">
 
                     </div>
@@ -76,6 +81,43 @@
 
                     </div>
                 </form>
+                <form action="" id="form2" style="display: none;">
+                    <h3 id="loaner" style="color: rgb(0, 248, 0) ;"></h3>
+                    <div class="inputBox">
+
+                        <input type="date" id="date"> <i>Date</i>
+
+                    </div>
+                    <div class="inputBox">
+
+                        <input type="number" name="" id="loan"> <i>value</i>
+
+                    </div>
+                    <br><br>
+                    <button id="existedLoan">Submit</button>
+                </form>
+                <form action="" id="form3" style="display: none;">
+                    <h3 id="loaner2" style="color: rgb(0, 248, 0) ;"></h3>
+                    <div class="inputBox">
+
+                        <input type="date" id="date2"> <i>Date</i>
+
+                    </div>
+                    <div class="inputBox">
+
+                        <input type="text" name="" id="loanerName"> <i>name</i>
+
+                    </div>
+                    <div class="inputBox">
+
+                        <input type="number" name="" id="loan2"> <i>value</i>
+
+                    </div>
+                    <br><br>
+                    <button id="newLoan">Submit</button>
+                </form>
+
+                
             </div>
 
         </div>
@@ -114,23 +156,106 @@
             choiceDiv.appendChild(selectElement);
         });
 
+        let loaner=""
 
+        let loanOwner=""
+        let projectOwner=""
         //display forms
         document.getElementById("project").addEventListener("click", () => {
+            document.getElementById("btns").style.display = "flex";
+            
+            let project = document.getElementById("projectSelect").value
+            projectOwner=project
+            document.getElementById("loanname").innerHTML = project + " project"
+
+        })
+
+        document.getElementById("show").addEventListener("click", () => {
             document.getElementById("buttons").style.display = "flex";
-            document.getElementById("loanname").innerHTML = document.getElementById("projectSelect").value + " project"
+            document.getElementById("form").style.display = "none";
+            document.getElementById("form2").style.display = "none";
+            document.getElementById("form3").style.display = "none";
+            let project = document.getElementById("projectSelect").value
+            socket.emit("getLoaners",{project})
+            socket.once("sendLoaners",(data)=>{
+               
+               let loans=data.loaners.loans 
+               let buttons= document.getElementById("buttons")
+               buttons.innerHTML=""
+               // Loop through the loaner names and create a button element for each one
+               for (const loaner in loans) {
+               // Create a new button element
+               const button = document.createElement("button");
+               
+               // Set the button's ID to the loaner name
+               button.id = loaner;
+               
+               // Set the button's text content to the loaner name
+               button.textContent = loaner;
+                 // Add an event listener to the button that displays the form and requests the loan action
+               button.addEventListener("click", () => {
+                   document.getElementById("form").style.display = "flex";
+                   socket.emit("getLoanAction", { loaner: loaner, project: document.getElementById("projectSelect").value });
+                   document.getElementById("loaner3").innerHTML= loaner 
+               });
+               // Append the button to the parent element
+               buttons.appendChild(button);
+               }
+
+           })
+          
 
         })
-        //display forms and request the schedual info
-        document.getElementById("create").addEventListener("click", () => {
-            document.getElementById("form").style.display = "flex";
-            socket.emit("getLoanAction", ({ loaner: "omar", project: document.getElementById("projectSelect").value }))
+        document.getElementById("add").addEventListener("click", () => {
+            document.getElementById("buttons").style.display = "flex";
+            document.getElementById("form").style.display = "none";
+            document.getElementById("form2").style.display = "none";
+            document.getElementById("form3").style.display = "none";
+            let project = document.getElementById("projectSelect").value
+            socket.emit("getLoaners",{project})
+            socket.once("sendLoaners",(data)=>{
+               
+               let loans=data.loaners.loans 
+               let buttons= document.getElementById("buttons")
+               buttons.innerHTML=""
+               // Loop through the loaner names and create a button element for each one
+               for (const loaner in loans) {
+               // Create a new button element
+               const button = document.createElement("button");
+               
+               // Set the button's ID to the loaner name
+               button.id = loaner;
+               
+               // Set the button's text content to the loaner name
+               button.textContent = loaner;
+                 // Add an event listener to the button that displays the form and requests the loan action
+               button.addEventListener("click", () => {
+                   document.getElementById("form2").style.display = "flex";
+                   document.getElementById("form3").style.display = "none";
+                   document.getElementById("loaner").innerHTML= loaner 
+                   loanOwner=loaner
+               });
+               // Append the button to the parent element
+               buttons.appendChild(button);
+               }
+               const button = document.createElement("button");
+               // Set the button's ID to the loaner name
+               button.id = "other";
+               // Set the button's text content to the loaner name
+               button.textContent = "other";
+                   // Add an event listener to the button that displays the form and requests the loan action
+                   button.addEventListener("click", () => {
+                   document.getElementById("form3").style.display = "flex";
+                   document.getElementById("form2").style.display = "none";
+                   document.getElementById("loaner2").innerHTML= "other" 
+               });
+               // Append the button to the parent element
+               buttons.appendChild(button);
+           })
+            
 
         })
-        document.getElementById("delete").addEventListener("click", () => {
-            document.getElementById("form").style.display = "flex"
-            socket.emit("getLoanAction", { loaner: "rageeb", project: document.getElementById("projectSelect").value })
-        })
+        
         let check = false
         document.getElementById("resources").addEventListener("click", () => {
 
@@ -152,6 +277,7 @@
 
         //reseve schedual info
         socket.on("sendLoanAction", (projects) => {
+            console.log("is sending")
             let project = projects;
             let statementDiv = document.getElementById("statment");
             statementDiv.innerHTML = ""; // clear the contents of the statement div
@@ -173,11 +299,34 @@
             // create a table row for each object in the project list
             console.log(project[project.length - 1].outSource)
 
-            for (let i =  0; i < project.length; i++) {
+            for (let i = 0; i < project.length; i++) {
                 let dataRow = document.createElement("tr");
                 for (let j = 0; j < keysToInclude.length; j++) {
                     let dataCell = document.createElement("td");
                     dataCell.textContent = project[i][keysToInclude[j]];
+                    if(j==0)
+                    dataCell.contentEditable = true; // make the cell editable
+
+                    dataCell.addEventListener("click", function () {
+                        // do something when the cell is clicked
+                        console.log("Cell clicked!");
+                        dataCell.addEventListener("blur", function () {
+                            let rowIndex = dataRow.rowIndex - 1;
+                            let row = {};
+                            let rowCells = dataRow.getElementsByTagName("td");
+                            for (let k = 0; k < rowCells.length; k++) {
+                                let keysToInclude2 = ["Loan", "Paid", "Remaining", "Date"];
+                                let cellValue = rowCells[k].textContent;
+                                let cellKey = keysToInclude2[k];
+                                row[cellKey] = cellValue;
+                                
+                            }
+                            console.log(row)
+                            row.projectOwner=document.getElementById("projectSelect").value
+                            row.loanerChange=loaner
+                            socket.emit("changeLoan",row)
+                        });
+                    });
                     dataRow.appendChild(dataCell);
                 }
                 tableElement.appendChild(dataRow);
@@ -190,11 +339,16 @@
             statementDiv = document.getElementById("resourceschedual");
             statementDiv.innerHTML = ""; // clear the contents of the statement div
             // create a table element
-             tableElement = document.createElement("table");
+            tableElement = document.createElement("table");
 
             // create a table row for the table header
-             headerRow = document.createElement("tr");
-             keysToInclude2 = ["Abaa", "Umi", "Swafia", "House","UAE","Total"];
+            headerRow = document.createElement("tr");
+            keysToInclude2 = Object.keys(project[project.length-1].source)
+             let index = keysToInclude2.indexOf("total");
+            if (index !== -1) {
+                keysToInclude2.splice(index, 1); // remove "description" from its current position
+                keysToInclude2.push("total"); // add "description" to the end of the list
+            }
             for (let i = 0; i < keysToInclude2.length; i++) {
                 let headerCell = document.createElement("th");
                 headerCell.textContent = keysToInclude2[i];
@@ -202,16 +356,24 @@
             }
             tableElement.appendChild(headerRow);
             //specify the nassasry colomns
-             keysToInclude = ["abaa", "umi", "swafia", "house","UAE","total"];
+             keysToInclude = Object.keys(project[project.length-1].source);
+             index = keysToInclude.indexOf("total");
+            if (index !== -1) {
+                keysToInclude.splice(index, 1); // remove "description" from its current position
+                keysToInclude.push("total"); // add "description" to the end of the list
+            }
             // create a table row for each object in the project list
             console.log(project[project.length - 1].outSource)
 
-            for (let i = project.length-1; i < project.length; i++) {
+            for (let i = project.length - 1; i < project.length; i++) {
                 let dataRow = document.createElement("tr");
                 for (let j = 0; j < keysToInclude.length; j++) {
                     let dataCell = document.createElement("td");
-                    dataCell.textContent = project[i][keysToInclude[j]];
-                    dataRow.appendChild(dataCell);
+                    
+                    dataCell.textContent = project[i]["source"][keysToInclude[j]];
+                 
+                    
+                     dataRow.appendChild(dataCell); 
                 }
                 tableElement.appendChild(dataRow);
             }
@@ -220,81 +382,111 @@
 
         })
 
+    </script>
+            
+    <script>
+            document.getElementById("existedLoan").addEventListener("click",()=>{
+                event.preventDefault()
+                console.log("clicked")
+                let value = document.getElementById("loan").value
+                if(value=== null || value==="")
+                {
+                    alert("please insert a value for the loan")
+                    return
+                }
+                value=parseInt(value)
+                console.log(typeof value)
+                let loaner=loanOwner
 
-
-        //getting the values
-        document.getElementById("Submit").addEventListener("click", () => {
-
-            event.preventDefault()
-            let abaaLoan = 0
-            let umiLoan = 0
-            let rageebLoan = 0
-            let omarLoan = 0
-            let projectname = ""
-            let date = ""
-
-
-            let abaa = document.getElementById("abaaLoan").value
-            let umi = document.getElementById("aishaLoan").value
-            let rageeb = document.getElementById("rageebLoan").value
-            let omar = document.getElementById("omarLoan").value
-            let project = document.getElementById("projectName").value
-            let datee = document.getElementById("date").value
-
-            if (abaa !== null && abaa !== "")
-                abaaLoan = parseInt(abaa)
-            if (umi !== null && umi !== "")
-                umiLoan = parseInt(umi)
-            if (rageeb !== null && rageeb !== "")
-                rageebLoan = parseInt(rageeb)
-            if (omar !== null && omar !== "")
-                omarLoan = parseInt(omar)
-            if (project != null)
-                projectname = project
-            else {
-                alert("project name cannot be empty")
-                return;
-            }
-            if (datee != null)
-                date = datee
-            else {
-                alert("date cannot be empty")
-                return;
-            }
-
-
-            console.log(umiLoan)
-            socket.emit("storeProject", { abaaLoan, umiLoan, projectname, date, rageebLoan, omarLoan })
-            socket.once("projectRespones", (message) => {
-
-                alert(message)
-                return
+                let date=document.getElementById("date").value
+                if(date=== null || date==="")
+                {
+                    alert("please insert a date for the loan")
+                    return
+                }
+                socket.emit("addLoan",{value,loaner,type:"existed",projectOwner,date})
             })
 
-        })
 
-        document.getElementById("Submit2").addEventListener("click", () => {
-            event.preventDefault();
+            document.getElementById("newLoan").addEventListener("click",()=>{
+                event.preventDefault()
+                console.log("clicked")
+                let value = document.getElementById("loan2").value
+                if(value=== null || value==="")
+                {
+                    alert("please insert a value for the loan")
+                    return
+                }
+                value=parseInt(value)
+                let loaner=document.getElementById("loanerName").value
+                if(loaner=== null || loaner==="")
+                {
+                    alert("please insert a loaner name for the loan")
+                    return
+                }
 
-            let project = ""
-            if (document.getElementById("projectName2").value == null) {
-                alert("project name connot be empty")
-                return
-            }
+                let words= loaner.split(" ")
+                if(words.length>1){
+                    alert(" loaner name cannot have space")
+                    return
+                }
 
-            else
-                project = document.getElementById("projectName2").value
+                let date=document.getElementById("date2").value
+                if(date=== null || date==="")
+                {
+                    alert("please insert a date for the loan")
+                    return
+                }
+                socket.emit("addLoan",{value,loaner,type:"new",projectOwner,date})
 
-            socket.emit("removeProject", project)
-            socket.once("projectRespones", (message) => {
-
-                alert(message)
-                return
             })
 
+
+            socket.on("sendLoanersedit",(data)=>{
+               
+               let loans=data.loaners[0].loans 
+               let buttons= document.getElementById("buttons")
+               buttons.innerHTML=""
+               // Loop through the loaner names and create a button element for each one
+               for (const loaner in loans) {
+               // Create a new button element
+               const button = document.createElement("button");
+               
+               // Set the button's ID to the loaner name
+               button.id = loaner;
+               
+               // Set the button's text content to the loaner name
+               button.textContent = loaner;
+                 // Add an event listener to the button that displays the form and requests the loan action
+               button.addEventListener("click", () => {
+                   document.getElementById("form2").style.display = "flex";
+                   document.getElementById("form3").style.display = "none";
+                   document.getElementById("loaner").innerHTML= loaner 
+                   loanOwner=loaner
+               });
+               // Append the button to the parent element
+               buttons.appendChild(button);
+               }
+               const button = document.createElement("button");
+               // Set the button's ID to the loaner name
+               button.id = "other";
+               // Set the button's text content to the loaner name
+               button.textContent = "other";
+                   // Add an event listener to the button that displays the form and requests the loan action
+                   button.addEventListener("click", () => {
+                   document.getElementById("form3").style.display = "flex";
+                   document.getElementById("form2").style.display = "none";
+                   document.getElementById("loaner2").innerHTML= "other" 
+               });
+               // Append the button to the parent element
+               buttons.appendChild(button);
+           })
+    </script>
+
+    <script>
+        socket.on("severResponse",(message)=>{
+            alert(message)
         })
-
-
     </script>
 </body>
 

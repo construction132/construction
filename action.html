@@ -2,6 +2,7 @@
 
 <head>
     <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="styles/style.css">
     <link rel="stylesheet" href="styles/statment.css">
 </head>
 
@@ -57,9 +58,8 @@
             </div>
             <br>
             <div id="btns" style="display: none;">
-                <button id="add">Add action</button>
-                <button id="edit">Edit action</button>
-                <button id="Delete">Delete action</button>
+                <button id="cashIn">Cash In</button>
+                <button id="cashOut">Cash Out</button>
             </div>
             <h2 id="project" style="color: rgb(0, 248, 0);"></h2>
             <div id="cashin/out" style="display: none; flex-direction: column; width: 100%; align-items: center;">
@@ -75,18 +75,28 @@
                         </div>
                         <div class="inputBox">
 
-                            <input type="number" name="" id="abaa"> <i>F In</i>
+                            <input type="number" name="" id="value"> <i>value</i>
 
                         </div>
+
                         <div class="inputBox">
 
-                            <select name="source" id="abaaSource" value="Abaa source">
-                                <option value="" disabled selected>Select Abaa source</option>
-                                <option value="Abaa">Abaa</option>
-                                <option value="Umi">Umi</option>
-                                <option value="Swafia">Swafia</option>
+                            <select name="source" id="giver" value="Abaa source">
+                                <option value="" disabled selected>Select Giver</option>
+                                <option value="abaa">Abaa</option>
+                                <option value="umi">Umi</option>
+                            </select>
+
+                        </div>
+
+                        <div class="inputBox">
+
+                            <select name="source" id="Source" value="Abaa source">
+                                <option value="" disabled selected>Select source</option>
+                                <option value="abaa">Abaa</option>
+                                <option value="umi">Umi</option>
                                 <option value="UAE">UAE</option>
-                                <option value="house">house</option>
+                               
 
                             </select>
 
@@ -94,47 +104,21 @@
                         <div class="inputBox">
 
 
-                            <select name="source" id="abaaTo" value="Abaa source">
-                                <option value="" disabled selected>Select Abaa To</option>
-                                <option value="omar">Omar</option>
-                                <option value="rageeb">Rageeb</option>
-                            </select>
+                            <select name="source" id="To" value="Abaa source">
 
-                        </div>
-                        <div class="inputBox">
-
-                            <input type="number" name="" id="umi"> <i>m in</i>
-
-                        </div>
-                        <div class="inputBox">
-
-
-                            <select name="source" id="umiSource" value="Abaa source">
-                                <option value="" disabled selected>Select Umi source</option>
-                                <option value="Abaa">Abaa</option>
-                                <option value="Umi">Umi</option>
-                                <option value="Swafia">Swafia</option>
-                                <option value="UAE">UAE</option>
-                                <option value="House">house</option>
 
                             </select>
 
                         </div>
                         <div class="inputBox">
-
-
-                            <select name="source" id="umiTo" value="Abaa source">
-                                <option value="" disabled selected>Select Umi To</option>
-                                <option value="omar">Omar</option>
-                                <option value="rageeb">Rageeb</option>
-                            </select>
-
+                            <input type="outSource" name="" id="purpose"> <i>purpose</i>
                         </div>
+
 
                         <input type="submit" name="" id="CashInSubmit">
 
                     </div>
-                    <div style="display: flex; flex-direction:column; align-items: center; width: 400px;" id="cashout">
+                    <div style="display: none; flex-direction:column; align-items: center; width: 400px;" id="cashout">
                         <h1 style="color: rgb(0, 248, 0);">Cash out</h1>
                         <div class="inputBox">
 
@@ -143,46 +127,46 @@
                         </div>
                         <div class="inputBox">
 
-                            <input type="number" name="" id="rentMoney"> <i>Rent</i>
+                            <input type="number" name="" id="value2"> <i>value</i>
 
                         </div>
                         <div class="inputBox">
 
-                            <input type="number" name="" id="CashMoney"> <i>Cash</i>
+                            <select name="source" id="source2" value="Abaa source">
+                                <option value="" disabled selected>Select source</option>
+                                <option value="cash">cash</option>
+                                <option value="rent">rent</option>
+                            </select>
+
+                        </div>
+                        <div class="inputBox">
+
+                            <select name="source" id="taker" value="Abaa source">
+                                <option value="" disabled selected>Select Taker</option>
+                            </select>
 
                         </div>
 
                         <div class="inputBox">
 
-                            <input type="number" name="" id="abaaLoan"> <i>Abaa Loan</i>
+                            <select name="source" id="extrataker" style="display: none;">
+                                <option value="" disabled selected>Select loan reciver</option>
+                                <option value="abaa">abaa</option>
+                                <option value="umi">umi</option>
+                            </select>
+
 
                         </div>
                         <div class="inputBox">
 
-                            <input type="number" name="" id="umiLoan"> <i>Umi Loan</i>
+                            <input type="text" name="" id="purpose2"> <i>purpose</i>
 
                         </div>
-                        <div class="inputBox">
 
-                            <input type="outSource" name="" id="outSource"> <i>Cash out source</i>
-
-                        </div>
-                        <div class="inputBox">
-
-                            <input type="number" name="" id="Withdraw"> <i>Umi Cash out</i>
-
-                        </div>
-                        <div class="inputBox">
-
-                            <input type="number" name="" id="Withdraw2"> <i>Abaa Cash out</i>
-
-                        </div>
                         <input type="submit" name="" id="CashOutSubmit">
                     </div>
 
                 </div>
-                <!-- <h3>submit together</h1>
-                    <input type="submit" name="" id="together"> -->
             </div>
         </div>
 
@@ -194,10 +178,7 @@
         const storedUsername = localStorage.getItem("username");
         if (storedUsername !== null) {
             username = storedUsername;
-            if (localStorage.getItem("username") == "admin")
-                document.getElementById("cashout").style.display = "none"
-            else if (localStorage.getItem("username") == "user")
-                document.getElementById("cashin").style.display = "none"
+
         }
         socket.emit("checkuser", username)
 
@@ -228,88 +209,69 @@
 
 
         document.getElementById("Submit").addEventListener("click", () => {
-            document.getElementById("cashin/out").style.display = "block"
+            document.getElementById("btns").style.display = "flex"
+            document.getElementById("cashin/out").style.display = "flex"
             //get the name from the select project
             let selectElement = document.getElementById("projectSelect");
             let selectedProject = selectElement.value;
             document.getElementById("project").innerHTML = selectedProject + " Project"
             projectOwner = selectedProject
+            socket.emit("getTakers", { projectOwner })
         })
 
-        document.getElementById("add").addEventListener("click", () => {
-            document.getElementById("cashin/out").style.display = "flex"
+        document.getElementById("cashIn").addEventListener("click", () => {
+            console.log("hi")
+            document.getElementById("cashin").style.display = "flex"
+            document.getElementById("cashout").style.display = "none"
+        })
 
-        })
-        document.getElementById("edit").addEventListener("click", () => {
-            document.getElementById("cashin/out").style.display = "none"
-        })
-        document.getElementById("Delete").addEventListener("click", () => {
-            document.getElementById("cashin/out").style.display = "none"
+
+        document.getElementById("cashOut").addEventListener("click", () => {
+            document.getElementById("cashout").style.display = "flex"
+            console.log("hi")
+            document.getElementById("cashin").style.display = "none"
         })
 
         document.getElementById("CashOutSubmit").addEventListener("click", async () => {
-
-
-
 
             let date = document.getElementById("date").value
             if (date === null || date === "") {
                 alert("dates must be specified")
                 return
             }
-            let rent = 0
-            let Cash = 0
-            let abaaLoan = 0
-            let umiLoan = 0
-            let umiIn = 0
-            let abaaIn = 0
-            let UmiOut = 0
-            let AbaaOut = 0
-            let abaaSource = ""
-            let umiSource = ""
+
+            let value = 0
+            let source = "-"
+            let giver = "-"
+            let to = "-"
+            let to2 = "-"
+            let purpose = "-"
+            let actionType = "cash out"
+            if (document.getElementById("value2").value !== null && document.getElementById("value2").value !== "")
+                value = parseFloat(document.getElementById("value2").value)
+            if (document.getElementById('source2').value !== null && document.getElementById("source2").value !== "")
+                source = document.getElementById('source2').value
+                
+            if (document.getElementById('taker').value !== null && document.getElementById("taker").value !== "")
+                to = document.getElementById('taker').value
+            if (document.getElementById('purpose2').value !== null && document.getElementById("purpose2").value !== "")
+                purpose = document.getElementById('purpose2').value
 
 
+            console.log(`value: ${value},source: ${source}, giver: ${giver}, to: ${to}, purpose: ${purpose}, actionType: ${actionType}`);
+            let projectOwner = document.getElementById("projectSelect").value
 
-            if (document.getElementById("abaaLoan").value !== null && document.getElementById("abaaLoan").value !== "") {
-                abaaLoan = parseFloat(document.getElementById("abaaLoan").value)
+
+            names = to.split("/")
+            first_name = names[0]
+
+
+            if (first_name !== projectOwner  ) {
+                console.log("in if")
+                if(document.getElementById('extrataker').value !== null && document.getElementById("extrataker").value !== "")
+                to2 = document.getElementById('extrataker').value
             }
-            else {
-                alert("abaa loan has to be specified")
-                return
-            }
-            if (document.getElementById("umiLoan").value !== null && document.getElementById("umiLoan").value !== "") {
-                umiLoan = parseFloat(document.getElementById("umiLoan").value)
-            }
-            else {
-                alert("umi loan has to be specified")
-                return
-            }
-
-            if (document.getElementById("CashMoney").value !== null && document.getElementById("CashMoney").value !== "")
-                Cash = parseFloat(document.getElementById("CashMoney").value)
-            if (document.getElementById("rentMoney").value !== null && document.getElementById("rentMoney").value !== "")
-                rent = parseFloat(document.getElementById("rentMoney").value)
-            if (document.getElementById('Withdraw').value !== null && document.getElementById("Withdraw").value !== "")
-                UmiOut = parseFloat(document.getElementById('Withdraw').value)
-            if (document.getElementById('Withdraw2').value !== null && document.getElementById("Withdraw2").value !== "")
-                AbaaOut = parseFloat(document.getElementById('Withdraw2').value)
-            let total = await new Promise((resolve, reject) => {
-                socket.emit("gettotal", Cash, rent, (response) => {
-                    resolve(response);
-                });
-            });
-
-            console.log("the total is " + total)
-            if (total < (abaaLoan + umiLoan)) {
-                alert("you can't give more than the total income from cash and rent which is " + total)
-                return
-            }
-            let outSource = ""
-            if (document.getElementById('outSource').value !== null && document.getElementById("outSource").value !== "")
-                outSource = document.getElementById('outSource').value
-            console.log(outSource)
-
-            socket.emit("addAction", { abaaSource, umiSource, date, abaaIn, umiIn, Cash, rent, abaaLoan, umiLoan, UmiOut, AbaaOut, projectOwner, outSource })
+            socket.emit("addAction", { actionType, value, source, giver, to, to2, purpose, projectOwner, date })
 
         })
 
@@ -319,91 +281,115 @@
                 alert("dates must be specified")
                 return
             }
-            let rent = 0
-            let Cash = 0
-            let abaaLoan = 0
-            let umiLoan = 0
-            let umiIn = 0
-            let abaaIn = 0
-            let UmiOut = 0
-            let AbaaOut = 0
-            let abaaSource = ""
-            let umiSource = ""
-            let abaaTo = ""
-            let umiTo = ""
-            if (document.getElementById("abaa").value !== null && document.getElementById("abaa").value !== "")
-                abaaIn = parseFloat(document.getElementById("abaa").value)
-            if (document.getElementById("umi").value !== null && document.getElementById("umi").value !== "")
-                umiIn = parseFloat(document.getElementById("umi").value)
-            if (document.getElementById('abaaSource').value !== null && document.getElementById("abaaSource").value !== "")
-                abaaSource = document.getElementById('abaaSource').value
-            if (document.getElementById('umiSource').value !== null && document.getElementById("umiSource").value !== "")
-                umiSource = document.getElementById('umiSource').value
-            if (document.getElementById('abaaTo').value !== null && document.getElementById("abaaTo").value !== "")
-            abaaTo = document.getElementById('abaaTo').value
-            
-            if (document.getElementById('umiTo').value !== null && document.getElementById("umiTo").value !== "")
-            umiTo = document.getElementById('umiTo').value
+            let value = 0
+            let source = "-"
+            let giver = "-"
+            let to = "-"
+            let purpose = "-"
+            let actionType = "cash in"
+            if (document.getElementById("value").value !== null && document.getElementById("value").value !== "")
+                value = parseFloat(document.getElementById("value").value)
+            if (document.getElementById("giver").value !== null && document.getElementById("giver").value !== "")
+                giver = document.getElementById("giver").value
+            if (document.getElementById('Source').value !== null && document.getElementById("Source").value !== "")
+            {
+                source = document.getElementById('Source').value
+               
+            }
+                
+            if (document.getElementById('To').value !== null && document.getElementById("To").value !== "")
+                to = document.getElementById('To').value
+            if (document.getElementById('purpose').value !== null && document.getElementById("purpose").value !== "")
+                purpose = document.getElementById('purpose').value
+            console.log(`value: ${value}, source: ${source}, giver: ${giver}, to: ${to}, purpose: ${purpose}, actionType: ${actionType}`);
 
-
-            socket.emit("addAction", { umiTo,abaaTo,abaaSource, umiSource, date, abaaIn, umiIn, Cash, rent, abaaLoan, umiLoan, UmiOut, AbaaOut, projectOwner })
+            let projectOwner = document.getElementById("projectSelect").value
+            console.log(to)
+            socket.emit("addAction", { actionType, value, source, giver, to, purpose, projectOwner, date })
 
         })
-        // document.getElementById("together").addEventListener("click", () => {
-        //     let date = document.getElementById("date").value
-        //     let date2 = document.getElementById("date2").value
-        //     if (date !== date2) {
-        //         alert("both dates has to be the same")
-        //         return
-        //     }
-        //     else if (date == null || date2 == null) {
-        //         alert("dates must be specified")
-        //         return
-        //     }
 
-        //     let rent = 0
-        //     let Cash = 0
-        //     let abaapercentage = 0
-        //     let umipercentage = 0
-        //     let umiIn = 0
-        //     let abaaIn = 0
-        //     let UmiOut = 0
-        //     let AbaaOut = 0
-        //     let abaaSource = ""
-        //     let umiSource = ""
-        //     if (document.getElementById("abaa").value !== null && document.getElementById("abaa").value !== "")
-        //         abaaIn = parseFloat(document.getElementById("abaa").value)
-        //     if (document.getElementById("umi").value !== null && document.getElementById("umi").value !== "")
-        //         umiIn = parseFloat(document.getElementById("umi").value)
-        //     if (document.getElementById("percentage").value !== null && document.getElementById("percentage").value !== "") {
-        //         abaapercentage = parseFloat(document.getElementById("percentage").value) / 100
-        //         umipercentage = 1 - abaapercentage
-        //     }
-        //     else {
-        //         alert("percentage has to be specified")
-        //         return
-        //     }
-        //     if (document.getElementById("CashMoney").value !== null && document.getElementById("CashMoney").value !== "")
-        //         Cash = parseFloat(document.getElementById("CashMoney").value)
-        //     if (document.getElementById("rentMoney").value !== null && document.getElementById("rentMoney").value !== "")
-        //         rent = parseFloat(document.getElementById("rentMoney").value)
-        //     if (document.getElementById('Withdraw').value !== null && document.getElementById("Withdraw").value !== "")
-        //         UmitOut = parseFloat(document.getElementById('Withdraw').value)
-        //     if (document.getElementById('Withdraw2').value !== null && document.getElementById("Withdraw2").value !== "")
-        //         AbaaOut = parseFloat(document.getElementById('Withdraw2').value)
-        //     if (document.getElementById('abaaSource').value !== null && document.getElementById("abaaSource").value !== "")
-        //         abaaSource = document.getElementById('abaaSource').value
-        //     if (document.getElementById('umiSource').value !== null && document.getElementById("umiSource").value !== "")
-        //         umiSource = document.getElementById('umiSource').value
-        //     console.log("hi")
-        //     console.log(abaaSource)
-        //     socket.emit("addAction", { abaaSource, umiSource, date, abaaIn, umiIn, Cash, rent, abaapercentage, umipercentage, UmiOut, AbaaOut, projectOwner })
-        // })
-
-
-        socket.on("addedAction",(message)=>{
+        socket.on("addedAction", (message) => {
             alert(message)
         })
+    </script>
+
+    <script>
+        socket.on("sendTakers", (data) => {
+            let takers = data.result
+            console.log(takers)
+            document.getElementById("taker").innerHTML = ""
+            let option = document.createElement("option");
+            option.value = "";
+            option.disabled = true;
+            option.selected = true;
+            option.textContent = "Select Taker";
+
+            document.getElementById("taker").appendChild(option);
+            for (let i = 0; i < takers.length; i++) {
+                let optionElement = document.createElement("option")
+
+                optionElement.id = `${takers[i]}`
+                optionElement.value = `${takers[i]}`
+                optionElement.innerHTML = `${takers[i]}`
+                optionElement.style.fontSize = "20px"
+                document.getElementById("taker").appendChild(optionElement)
+            }
+            document.getElementById("taker").addEventListener("change", () => {
+                let projectOwner = document.getElementById("projectSelect").value
+                let [projectto, loanerto] = document.getElementById("taker").value.split('/');
+                if (projectto!==projectOwner) {
+                    console.log("not umi or abaa")
+                    document.getElementById("extrataker").style.display = "";
+                }
+                else {
+                    document.getElementById("extrataker").style.display = "none";
+                }
+                console.log("hi")
+            })
+
+        })
+    </script>
+
+
+    <script>
+        //this is getting the loaners of the project
+        document.getElementById("cashIn").addEventListener("click", () => {
+            let projectOwner = document.getElementById("projectSelect").value
+            socket.emit("getLoaners", { project: projectOwner })
+        })
+        //this is getting the loaners of the project
+        document.getElementById("Submit").addEventListener("click", () => {
+            let projectOwner = document.getElementById("projectSelect").value
+            socket.emit("getLoaners", { project: projectOwner })
+        })
+
+        socket.on("sendLoaners", (data) => {
+            console.log(data)
+            let loaners = data.loaners
+            let loans = loaners.loans
+            console.log(loans)
+            document.getElementById("To").innerHTML = ""
+            let option = document.createElement("option");
+            option.value = "";
+            option.disabled = true;
+            option.selected = true;
+            option.textContent = "Select Taker";
+            document.getElementById("To").appendChild(option);
+            for (let loan in loans) {
+
+                if (loan !== "abaa" && loan !== "umi") {
+                    let optionElement = document.createElement("option")
+                    optionElement.id = `${loan}`
+                    optionElement.value = `${loan}`
+                    optionElement.innerHTML = `${loan}`
+
+                    document.getElementById("To").appendChild(optionElement)
+                }
+
+            }
+        })
+
     </script>
     </section>
 </body>

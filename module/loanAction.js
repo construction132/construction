@@ -4,13 +4,8 @@ let projectSchema = new mongoose.Schema({
     loaner: String,
     StartingLoan: Number,
     date: String,
-    abaa: Number,
+    source:Object,
     paid:Number,
-    umi: Number,
-    UAE: Number,
-    house: Number,
-    swafia:Number,
-    total:Number,
     remaining: Number,
 });
 

@@ -53,6 +53,7 @@
             <br>
             <button id="Submit">Submit</button>
             <div id="statment">
+
             </div>
             <div id="statment2">
 
@@ -108,6 +109,7 @@
         socket.on("sendActions", (actions) => {
             console.log("in send actions")
             project = actions;
+
             let statementDiv = document.getElementById("statment");
             statementDiv.innerHTML = ""; // clear the contents of the statement div
 
@@ -116,31 +118,84 @@
             tableElement.id = "detailTable"
             // create a table row for the table header
             let headerRow = document.createElement("tr");
-            let keysToInclude2 = ["N", "abaa Loan", "umi Loan", "abaa In", "abaa Source", "umi In", "umi Source", "rent", "cash", "cash Shling", "total", "abaa Out", "umi Out", "out Source", "abaa Total", "umi Total", "remaining Abaa", "remaining Umi", "remaining Total", "date"];
-            for (let i = 0; i < keysToInclude2.length; i++) {
+
+            let keysToInclude2 = ["N", "action type", "value", "source", "taker", "purpose", "remaining Total", "total Paid", "date"];
+            //adding the loans dynamiclly
+            let remainingKeys = Object.keys(project[project.length - 1].remainingLoans).map(key => "remaining " + key);
+            let allKeysToInclude = [...keysToInclude2.slice(0, 6), ...remainingKeys, ...keysToInclude2.slice(6)];
+            for (let i = 0; i < allKeysToInclude.length; i++) {
                 let headerCell = document.createElement("th");
-                headerCell.textContent = keysToInclude2[i];
+                headerCell.textContent = allKeysToInclude[i];
                 headerRow.appendChild(headerCell);
             }
             tableElement.appendChild(headerRow);
             //specify the nassasry colomns
-            let keysToInclude = ["actionNumber", "abaaLoan", "umiLoan", "abaaIn", "abaaSource", "umiIn", "umiSource", "rent", "cash", "cashShling", "total", "abaaOut", "umiOut", "outSource", "abaaTotal", "umiTotal", "remainingAbaa", "remainingUmi", "remainingTotal", "date"];
+            let keysToInclude = ["actionNumber", "actionType", "value", "source", "taker", "purpose", "totalRemaining", "totalPaid", "date"];
+            //adding the loans dynamiclly
+            let loanKeys = Object.keys(project[project.length - 1].remainingLoans);
+            allKeysToInclude = [...keysToInclude.slice(0, 6), ...loanKeys, ...keysToInclude.slice(6)];
             // create a table row for each object in the project list
-            console.log(project[project.length - 1].outSource)
+            console.log("actions are " + project[0])
 
             for (let i = 0; i < project.length; i++) {
                 let dataRow = document.createElement("tr");
-                for (let j = 0; j < keysToInclude.length; j++) {
+                for (let j = 0; j < allKeysToInclude.length; j++) {
                     let dataCell = document.createElement("td");
-                    dataCell.textContent = project[i][keysToInclude[j]];
+
+                    // If the current key is a loan key, get the loan value from the loans object
+                    if (loanKeys.includes(allKeysToInclude[j])) {
+                        let loanValue = project[i].remainingLoans[allKeysToInclude[j]];
+                        dataCell.textContent = loanValue !== undefined ? loanValue : "";
+                    }
+                    // Otherwise, get the value from the current object
+                    else {
+                        dataCell.textContent = project[i][allKeysToInclude[j]];
+                    }
+
                     dataRow.appendChild(dataCell);
                 }
                 tableElement.appendChild(dataRow);
+                tableElement.style.display = "none"
+                //redefine the loan for the row if it is not the last row
+                // if (i + 1 !== project.length) {
+                //     loanKeys = Object.keys(project[i + 1].loans);;
+                //     allKeysToInclude = [...keysToInclude.slice(0, 6), ...loanKeys, ...keysToInclude.slice(6)];
+                // }
+
             }
 
             statementDiv.appendChild(tableElement);
+            makeColapsTable(project)
+
+
+
             let space = document.createElement("br")
             statementDiv.appendChild(space)
+            const btn3 = document.createElement("button")
+            btn3.appendChild(space)
+            btn3.id = "colapsbtn"
+            btn3.innerHTML = "Show Detail";
+            statementDiv.appendChild(btn3);
+
+            let check2 = false
+            btn3.addEventListener("click", () => {
+                if (!check2) {
+                    document.getElementById("collapsedDetailTable").style.display = "none"
+                    document.getElementById("detailTable").style.display = "block"
+                    btn3.innerHTML = "Show Colapse"
+                    check2 = true
+
+                } else {
+                    console.log("in else")
+                    document.getElementById("collapsedDetailTable").style.display = "block"
+                    document.getElementById("detailTable").style.display = "none"
+                    btn3.innerHTML = "Show Detail"
+                    check2 = false
+                }
+            })
+
+
+
             const btn = document.createElement("button")
             btn.id = "summaryBtn"
             btn.innerHTML = "Show Summary";
@@ -156,6 +211,7 @@
                 statementDiv.style.display = "none"
             }
 
+
             // create a table element
             tableElement = document.createElement("table");
             tableElement.id = "summaryTable"
@@ -166,26 +222,45 @@
             objectKeys = Object.keys(project[0]); // get the keys of the first object in the project list
             objectKeys = objectKeys.slice(1, -1);
             console.log(objectKeys)
-            keysToInclude2 = ["N", "totsal", "remaining Abaa", "remaining Umi", "remaining Total", "date"];
-            for (let i = 0; i < keysToInclude2.length; i++) {
+            keysToInclude2 = ["N", "total", "remaining Total", "total Paid", "date"];
+            remainingKeys = Object.keys(project[project.length - 1].remainingLoans).map(key => "remaining " + key);
+            allKeysToInclude = [...keysToInclude2.slice(0, 2), ...remainingKeys, ...keysToInclude2.slice(2)];
+            for (let i = 0; i < allKeysToInclude.length; i++) {
                 let headerCell = document.createElement("th");
-                headerCell.textContent = keysToInclude2[i];
+                headerCell.textContent = allKeysToInclude[i];
                 headerRow.appendChild(headerCell);
             }
             tableElement.appendChild(headerRow);
             //specify the nassasry colomns
-            keysToInclude = ["actionNumber", "total", "remainingAbaa", "remainingUmi", "remainingTotal", "date"];
+            keysToInclude = ["actionNumber", "value", "totalRemaining", "totalPaid", "date"];
+            loanKeys = Object.keys(project[project.length - 1].remainingLoans);
+            allKeysToInclude = [...keysToInclude.slice(0, 2), ...loanKeys, ...keysToInclude.slice(2)];
             // create a table row for each object in the project list
             for (let i = 0; i < project.length; i++) {
                 let dataRow = document.createElement("tr");
-                for (let j = 0; j < keysToInclude.length; j++) {
+                for (let j = 0; j < allKeysToInclude.length; j++) {
                     let dataCell = document.createElement("td");
-                    dataCell.textContent = project[i][keysToInclude[j]];
+
+                    if (allKeysToInclude[j] === "total") {
+                        dataCell.textContent = project[i]["value"]
+                    }
+                    if (loanKeys.includes(allKeysToInclude[j])) {
+                        let loanValue = project[i]["remainingLoans"][allKeysToInclude[j]];
+                        dataCell.textContent = loanValue !== undefined ? loanValue : "";
+                    }
+                    // Otherwise, get the value from the current object
+                    else {
+                        dataCell.textContent = project[i][allKeysToInclude[j]];
+                    }
                     dataRow.appendChild(dataCell);
                 }
                 tableElement.appendChild(dataRow);
             }
             statementDiv.appendChild(tableElement);
+
+
+
+
             const btn2 = document.createElement("button")
             statementDiv.appendChild(space)
             btn2.id = "detailsBtn"
@@ -202,6 +277,7 @@
                 statementDiv.style.display = "none"
             }
             document.getElementById("delete").style.display = "block"
+
 
 
             let check = false
@@ -249,8 +325,11 @@
 
             let selectElement = document.getElementById("projectSelect");
             let selectedProject = selectElement.value;
-            socket.emit("deleteLastAction", selectedProject)
-        })
+
+            if (confirm("Are you sure you want to delete the last action?")) {
+                socket.emit("deleteLastAction", selectedProject);
+            }
+        });
         let check2 = false
         function editabletable() {
             console.log("in function")
@@ -334,28 +413,49 @@
             tableElement.id = "detailTable"
             // create a table row for the table header
             let headerRow = document.createElement("tr");
-            let keysToInclude2 = ["N", "abaa Loan", "umi Loan", "abaa In", "abaa Source", "umi In", "umi Source", "rent", "cash", "cash Shling", "total", "abaa Out", "umi Out", "out Source", "abaa Total", "umi Total", "remaining Abaa", "remaining Umi", "remaining Total", "date"];
-            for (let i = 0; i < keysToInclude2.length; i++) {
+            let keysToInclude2 = ["N", "action type", "value", "source", "taker", "purpose", "remaining Total", "total Paid", "date"];
+            //adding the loans dynamiclly
+            let remainingKeys = Object.keys(project[project.length - 1].remainingLoans).map(key => "remaining " + key);
+            let allKeysToInclude = [...keysToInclude2.slice(0, 6), ...remainingKeys, ...keysToInclude2.slice(6)];
+            for (let i = 0; i < allKeysToInclude.length; i++) {
                 let headerCell = document.createElement("th");
-                headerCell.textContent = keysToInclude2[i];
+                headerCell.textContent = allKeysToInclude[i];
                 headerRow.appendChild(headerCell);
             }
             tableElement.appendChild(headerRow);
             //specify the nassasry colomns
-            let keysToInclude = ["actionNumber", "abaaLoan", "umiLoan", "abaaIn", "abaaSource", "umiIn", "umiSource", "rent", "cash", "cashShling", "total", "abaaOut", "umiOut", "outSource", "abaaTotal", "umiTotal", "remainingAbaa", "remainingUmi", "remainingTotal", "date"];
+            let keysToInclude = ["actionNumber", "actionType", "value", "source", "taker", "purpose", "totalRemaining", "totalPaid", "date"];
+            //adding the loans dynamiclly
+            let loanKeys = Object.keys(project[project.length - 1].remainingLoans);
+            allKeysToInclude = [...keysToInclude.slice(0, 6), ...loanKeys, ...keysToInclude.slice(6)];
             // create a table row for each object in the project list
-            console.log(project[project.length - 1].outSource)
+            console.log("actions are " + allKeysToInclude)
 
             for (let i = 0; i < project.length; i++) {
                 let dataRow = document.createElement("tr");
-                for (let j = 0; j < keysToInclude.length; j++) {
+                for (let j = 0; j < allKeysToInclude.length; j++) {
                     let dataCell = document.createElement("td");
-                    dataCell.textContent = project[i][keysToInclude[j]];
+
+                    // If the current key is a loan key, get the loan value from the loans object
+                    if (loanKeys.includes(allKeysToInclude[j])) {
+                        let loanValue = project[i].remainingLoans[allKeysToInclude[j]];
+                        dataCell.textContent = loanValue !== undefined ? loanValue : "";
+                    }
+                    // Otherwise, get the value from the current object
+                    else {
+                        dataCell.textContent = project[i][allKeysToInclude[j]];
+                    }
+
                     dataRow.appendChild(dataCell);
                 }
                 tableElement.appendChild(dataRow);
-            }
+                //redefine the loan for the row if it is not the last row
+                // if (i + 1 !== project.length) {
+                //     loanKeys = Object.keys(project[i + 1].loans);;
+                //     allKeysToInclude = [...keysToInclude.slice(0, 6), ...loanKeys, ...keysToInclude.slice(6)];
+                // }
 
+            }
             statementDiv.appendChild(tableElement);
             let space = document.createElement("br")
             statementDiv.appendChild(space)
@@ -377,7 +477,7 @@
             objectKeys = Object.keys(project[0]); // get the keys of the first object in the project list
             objectKeys = objectKeys.slice(1, -1);
             console.log(objectKeys)
-            keysToInclude2 = ["N", "totsal", "remaining Abaa", "remaining Umi", "remaining Total", "date"];
+            keysToInclude2 = ["N", "totsal", "remaining Abaa", "remaining Umi", "remaining Total", "total Paid", "date"];
             for (let i = 0; i < keysToInclude2.length; i++) {
                 let headerCell = document.createElement("th");
                 headerCell.textContent = keysToInclude2[i];
@@ -385,13 +485,22 @@
             }
             tableElement.appendChild(headerRow);
             //specify the nassasry colomns
-            keysToInclude = ["actionNumber", "total", "remainingAbaa", "remainingUmi", "remainingTotal", "date"];
+            keysToInclude = ["actionNumber", "total", "abaa", "umi", "totalRemaining", "totalTotal", "date"];
             // create a table row for each object in the project list
             for (let i = 0; i < project.length; i++) {
                 let dataRow = document.createElement("tr");
                 for (let j = 0; j < keysToInclude.length; j++) {
                     let dataCell = document.createElement("td");
-                    dataCell.textContent = project[i][keysToInclude[j]];
+
+                    // If the current key is a loans key, get the loan value from the loans object
+                    if (keysToInclude[j] === "abaa" || keysToInclude[j] === "umi") {
+                        let loanValue = project[i]["remainingLoans"][keysToInclude[j]];
+                        dataCell.textContent = loanValue !== undefined ? loanValue : "";
+                    }
+                    // Otherwise, get the value from the current object
+                    else {
+                        dataCell.textContent = project[i][keysToInclude[j]];
+                    }
                     dataRow.appendChild(dataCell);
                 }
                 tableElement.appendChild(dataRow);
@@ -516,7 +625,108 @@
                     });
                 }
             }
+
+
         })
+        function makeColapsTable(project) {
+            localStorage.removeItem('value')
+            localStorage.removeItem("value2")
+            // Find the table element
+            let tableElement = document.getElementById("detailTable");
+
+            // Create a new table element for the collapsed rows
+            let collapsedTableElement = document.createElement("table");
+            collapsedTableElement.id = "collapsedDetailTable";
+
+            // Create a table row for the table header
+            let headerRow = document.createElement("tr");
+
+            // Define the keys that will be included in the collapsed rows
+            let keysToInclude2 = ["N", "action type", "value", "source", "taker", "purpose", "date"];
+            // adding the loans dynamically
+            let remainingKeys = "";
+            let allKeysToInclude = [...keysToInclude2.slice(0, 6), ...remainingKeys, ...keysToInclude2.slice(6)];
+
+            // Create table header cells for the keys to include
+            for (let i = 0; i < allKeysToInclude.length; i++) {
+                let headerCell = document.createElement("th");
+                headerCell.textContent = allKeysToInclude[i];
+                headerRow.appendChild(headerCell);
+            }
+            collapsedTableElement.appendChild(headerRow);
+
+            // Create a mapping of date-taker pairs to their corresponding rows
+            let dateTakerToRowsMap = {};
+
+            // Iterate over each row in the table (skip the first row, which contains the headers)
+            for (let i = 1; i < tableElement.rows.length; i++) {
+                let row = tableElement.rows[i];
+
+                // Get the cells in the row
+                let cells = row.getElementsByTagName("td");
+
+                // Get the date and taker values from the current row
+                let currentDate = cells[cells.length - 1].textContent;
+                let currentTaker = cells[4].textContent;
+                let dateTakerKey = currentDate + "_" + currentTaker;
+
+                // If the date-taker key exists in the map, update the row reference to the current row
+                if (dateTakerToRowsMap[dateTakerKey]) {
+
+
+                    console.log(" the key exist and it is  " + dateTakerKey)
+                    // Concatenate the values of cells 0, 1, 3, and 5
+                    dateTakerToRowsMap[dateTakerKey].cells[0].textContent += ", " + cells[0].textContent;
+                    dateTakerToRowsMap[dateTakerKey].cells[1].textContent += ", " + cells[1].textContent;
+                    dateTakerToRowsMap[dateTakerKey].cells[3].textContent += ", " + cells[3].textContent;
+                    dateTakerToRowsMap[dateTakerKey].cells[5].textContent += ", " + cells[5].textContent;
+                    
+                    localStorage.setItem("value",localStorage.getItem("value")+","+cells[3].textContent+cells[2].textContent)
+                    // Update the value for cell 2 (parse the content as an integer and then add)
+                    let currentValue = parseInt(dateTakerToRowsMap[dateTakerKey].cells[2].textContent);
+                    let additionalValue = parseInt(cells[2].textContent);
+                    dateTakerToRowsMap[dateTakerKey].cells[2].textContent = (currentValue + additionalValue).toString();
+
+                } else {
+                    // If the date-taker key doesn't exist, create a new row and add it to the map
+                    let newRow = collapsedTableElement.insertRow();
+                    for (let j = 0; j < 6; j++) {
+                        let newCell = newRow.insertCell();
+                        if (j != 2)
+                            newCell.textContent = cells[j].textContent;
+                        else {
+                            let check=false
+                            newCell.addEventListener("click", () => {
+                                console.log("click");
+
+                                if(!check){
+                                    localStorage.setItem("value2",`${newCell.textContent}`)
+                                    newCell.textContent=localStorage.getItem("value")
+                                    check=true
+                                }else{
+                                    newCell.textContent=localStorage.getItem("value2")
+                                    check=false
+                                }
+                            });
+                            newCell.textContent = cells[j].textContent;
+                        }
+
+
+                    }
+                    
+                    let newCell = newRow.insertCell();
+                    newCell.textContent = cells[cells.length - 1].textContent;
+                  
+                    // Add the new row to the map with the current date-taker key
+                    dateTakerToRowsMap[dateTakerKey] = newRow;
+                }
+                // Insert the collapsed table after the original table
+                tableElement.parentNode.insertBefore(collapsedTableElement, tableElement.nextSibling);
+            }
+
+
+
+        }
 
     </script>
 </body>

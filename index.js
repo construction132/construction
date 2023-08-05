@@ -12,10 +12,18 @@ const io = socketio(server);
 const User = require("./module/users.js");
 const Project = require("./module/projects.js")
 const statment = require("./classes/statment.js")
+const statment2 = require("./classes/statment2.js")
 const Action = require("./module/actions.js")
 const loans = require("./module/loans.js")
 const loanAction = require("./module/loanAction.js")
 const Loan = require("./classes/Loan.js")
+const addLoan = require("./classes/addLoan.js")
+
+
+const ProjectObject = require("./module/projectsobject.js")
+const ActionObject = require("./module/actionsobject.js");
+const actionsobject = require("./module/actionsobject.js");
+
 
 connect()
 async function connect() {
@@ -118,24 +126,17 @@ io.on("connection", (socket) => {
 
     socket.on("storeProject", async (data) => {
         console.log("in socket")
-        abaa = data.abaaLoan
-        umi = data.umiLoan
-        omar = data.omarLoan
-        rageeb = data.rageebLoan
+        let loans = data.loans
         project = data.projectname
         date = data.date
-
         // Create a new document and save it to the "projects" collection
-        let newProject = new Project({
+        let newProject = new ProjectObject({
             project: project,
-            abaaLoan: abaa,
-            umiLoan: umi,
-            rageebLoan: rageeb,
-            omarLoan: omar,
+            loans: loans,
             date: date
         });
         // Check if a project with the given name already exists
-        let existingProject = await Project.findOne({ project: project });
+        let existingProject = await ProjectObject.findOne({ project: project });
 
         if (existingProject) {
             console.log("found")
@@ -147,21 +148,48 @@ io.on("connection", (socket) => {
 
         }
 
-        startAction({ date, abaa, umi, project })
-        startLoan({ date, omar, rageeb, project })
+        startAction({ date, loans, project, loans })
+        startLoan({ date, loans, project })
 
     })
 
     socket.on("removeProject", async (projectname) => {
+        let counter = 0;
+        try {
+            //remove from the project collection the project of the specifc projectname
+            let deletee = await ProjectObject.deleteMany({ project: projectname })
+            counter++
+        } catch (error) {
+            console.log(error)
+        }
+        try {
+            //remove from the project collection the project of the specifc projectname
+            let deletee = await loanAction.deleteMany({ project: projectname })
+            counter++
+        } catch (error) {
+            console.log(error)
+        }
+        try {
+            //remove from the project collection the project of the specifc projectname
+            let deletee = await loans.deleteMany({ project: projectname })
+            counter++
+        } catch (error) {
+            console.log(error)
+        }
 
-        //remove from the project collection the project of the specifc projectname
-        let deletee = await Project.deleteOne({ project: projectname })
-        console.log(deletee)
-        //if print if there was a project has been deleted or no 
-        if (deletee.deletedCount == 0)
-            socket.emit("projectRespones", "nothing has been deleted")
-        else
-            socket.emit("projectRespones", "the project has beed removed successfully")
+        try {
+            //remove from the project collection the project of the specifc projectname
+            let deletee = await ActionObject.deleteMany({ owner: projectname })
+            counter++
+        } catch (error) {
+            console.log(error)
+        }
+        if (counter === 4) {
+            socket.emit("projectRespones", "project has been deleted")
+            //get all the projects in the project table\
+            const projects = await ProjectObject.find();
+            socket.emit("sendProjects", projects)
+        }
 
     })
 
@@ -169,130 +197,193 @@ io.on("connection", (socket) => {
     socket.on("getProjects", async () => {
 
         //get all the projects in the project table\
-        const projects = await Project.find();
+        const projects = await ProjectObject.find();
         socket.emit("sendProjects", projects)
     })
 
-
-    socket.on("addAction", async (data) => {
-        let date1 = data.date
-        let abaaIn = data.abaaIn
-        let umiIn = data.umiIn
-        let Cash = data.Cash
-        let rent = data.rent
-        let abaaLoneDecrease = data.abaaLoan
-        let umiLoneDecrease = data.umiLoan
-        let outSource = data.outSource
-        let UmiOut = data.UmiOut
-        let AbaaOut = data.AbaaOut
-        let projectOwner = data.projectOwner
-        let abaaSource = data.abaaSource
-        let umiSource = data.umiSource
-        let umiTo = data.umiTo
-        let abaaTo = data.abaaTo
-
-        console.log("umi decrese is  ", umiLoneDecrease)
-        //retrive the project from the database that has name of projectowner
-        let owner = {};
+    socket.on("getLoaners", async (data) => {
+        let project = data.project
+        console.log(project)
         try {
-            owner = await Action.find({ owner: projectOwner })
-        } catch (err) {
-            console.log("there is an error happened")
-            socket.emit("addedAction","an error happened while trying to add action")
-            return
+            let loaners = await ProjectObject.findOne({ project: project })
+            console.log(loaners)
+            socket.emit("sendLoaners", { loaners })
+        } catch (error) {
+            console.log(error)
         }
 
-        console.log("the owner is " + owner[owner.length - 1].remainingAbaa + "p owner " + projectOwner)
-        try {
-            let newstatment = new statment(owner[owner.length - 1].remainingAbaa, owner[owner.length - 1].remainingUmi, abaaIn, umiIn, rent, Cash, abaaLoneDecrease, umiLoneDecrease, AbaaOut, UmiOut, date1, owner[owner.length - 1].abaaTotal, owner[owner.length - 1].umiTotal)
+    })
+    socket.on("addAction", async (data) => {
+        let date1 = data.date
+        let value = data.value
+        let source = data.source
+        let giver = data.giver
+        let projectOwner = data.projectOwner
+        let purpose = data.purpose
+        let actionType = data.actionType
 
-            let done = await newstatment.calculateRemainingLoan()
-            let newAction = new Action({
+        //retrive the project from the database that has name of projectowner
+
+
+        let to = data.to
+        let to2 = data.to2
+        let endtaker = ""
+        let projectto=""
+        let loanerto=""
+        if(to==="other")
+        {
+            endtaker=to2
+        }
+        else if (actionType === "cash out") {
+             [projectto, loanerto] = to.split('/');
+
+            if (projectto === projectOwner) {
+                endtaker = loanerto
+            }
+            else {
+                endtaker = to2
+            }
+        }
+        else if (actionType === "cash in")
+            endtaker = to
+
+
+
+        try {
+
+
+            let owner = await ActionObject.find({ owner: projectOwner })
+            let newstatment = new statment(owner[owner.length - 1].remainingLoans, value, source, giver, endtaker, purpose, date1, owner[owner.length - 1].totalRemaining, owner[owner.length - 1].totalPaid, actionType)
+            await newstatment.calculateRemainingLoan()
+            console.log("the statment source is "+ source)
+            let newAction = new ActionObject({
                 actionNumber: owner.length + 1,
                 owner: projectOwner,
-                abaaLoan: newstatment.abaaLoan,
-                umiLoan: newstatment.umiLoan,
-                abaaIn: newstatment.abaaIn,
-                abaaSource: abaaSource,
-                umiIn: newstatment.umiIn,
-                umiSource: umiSource,
-                rent: newstatment.rent,
-                cash: newstatment.cash,
-                cashShling: newstatment.cashShling,
-                abaaLoneDecrease: newstatment.abaaLoneDecrease,
-                umiLoneDecrease: newstatment.umiLoneDecrease,
-                total: newstatment.total,
-                abaaOut: newstatment.abaaOut,
-                umiOut: newstatment.umiOut,
-                outSource: outSource,
-                abaaTotal: newstatment.abaaTotal,
-                umiTotal: newstatment.umiTotal,
-                remainingAbaa: newstatment.remainingAbaa,
-                remainingUmi: newstatment.remainingUmi,
-                remainingTotal: newstatment.remainingTotal,
+                actionType: newstatment.actionType,
+                loans: newstatment.loans,
+                value: newstatment.value,
+                giver: newstatment.giver,
+                source: newstatment.source,
+                taker: newstatment.taker,
+                purpose: newstatment.purpose,
+                remainingLoans: newstatment.remaining,
+                totalRemaining: newstatment.remainingTotal,
+                totalPaid: newstatment.totalPaid,
                 shlingFactor: newstatment.shlingFactor,
                 date: newstatment.date
             });
-            let save = await newAction.save()
+            await newAction.save()
+
+
+
+            //doing the second calculation if the pay wasnt for the same loan 
+            if (actionType === "cash out") {
+                if (projectto !== projectOwner&&to!=="other") {
+                    let owner = await ActionObject.find({ owner: projectto })
+                    let newstatment = new statment2(owner[owner.length - 1].remainingLoans, value, "from " + projectOwner + " to " + loanerto, giver, to2, loanerto, purpose, date1, owner[owner.length - 1].totalRemaining, owner[owner.length - 1].totalPaid, actionType)
+
+                    await newstatment.calculateRemainingLoan()
+                    let newAction = new ActionObject({
+                        actionNumber: owner.length + 1,
+                        owner: projectto,
+                        actionType: newstatment.actionType,
+                        loans: newstatment.loans,
+                        value: newstatment.value,
+                        giver: newstatment.giver,
+                        source: newstatment.source,
+                        taker: loanerto,
+                        purpose: newstatment.purpose,
+                        remainingLoans: newstatment.remaining,
+                        totalRemaining: newstatment.remainingTotal,
+                        totalPaid: newstatment.totalPaid,
+                        shlingFactor: newstatment.shlingFactor,
+                        date: newstatment.date
+                    });
+                    await newAction.save()
+                    
+                    console.log("the end taker is "+loanerto)
+                    let loanACtions = await loanAction.find({ loaner: endtaker, project: projectto })
+                    let loan = new Loan(loanACtions[loanACtions.length - 1].remaining, loanACtions[loanACtions.length - 1].source, value, projectOwner, loanerto, projectto, date1)
+                    await storeActionLoan(loan)
+
+                    try {
+
+
+                        let loanACtions = await loanAction.find({ loaner: to2, project: projectto })
+                        let loan = new Loan(loanACtions[loanACtions.length - 1].remaining, loanACtions[loanACtions.length - 1].source, value * -1, projectOwner, to2, projectto, date1)
+                        await storeActionLoan(loan)
+                    } catch (error) {
+                        console.log(error)
+                    }
+                }
+
+            }
+
+
+
 
         }
         catch (error) {
             console.log(error)
-            socket.emit("addedAction","an error happened while trying to add action")
+            socket.emit("addedAction", "an error happened while trying to add action")
         }
 
-        //get the privous action loans
-        try {
-            let omarLoan = await loanAction.find({ loaner: "omar", project: projectOwner })
-            let rageebLoan = await loanAction.find({ loaner: "rageeb", project: projectOwner })
-            console.log("omar is "+ omarLoan)
-            console.log("rageeb is "+ rageebLoan)
-            //making the action of the loan
-            console.log("in try umi to is "+umiTo+" abaa to is "+abaaTo)
-            if (umiTo === abaaTo&&umiTo==="omar") {
-                console.log("from socket abaasource is "+ abaaSource+" and umiSource is "+umiSource)
-                let pay = new Loan(omarLoan[omarLoan.length-1].remaining, omarLoan[omarLoan.length-1].abaa, omarLoan[omarLoan.length-1].umi, omarLoan[omarLoan.length-1].UAE, omarLoan[omarLoan.length-1].house, omarLoan[omarLoan.length-1].swafia, abaaIn, umiIn, abaaSource, umiSource, "omar",projectOwner,date1)
-               
-                let store = await storeActionLoan(pay)
+
+
+        //make loan actions
+        let loanACtions = await loanAction.find({ loaner: endtaker, project: projectOwner })
+        let loan = new Loan(loanACtions[loanACtions.length - 1].remaining, loanACtions[loanACtions.length - 1].source, value, projectOwner, endtaker, projectOwner, date1)
+        await storeActionLoan(loan)
+      
+
+
+        if (actionType === "cash in") {
+
+          
+
+            try {
+
+                
+                let loanACtions = await loanAction.find({ loaner: giver, project: projectOwner })
+                let loan = new Loan(loanACtions[loanACtions.length - 1].remaining, loanACtions[loanACtions.length - 1].source, value * -1, source, giver, projectOwner, date1)
+                await storeActionLoan(loan)
+            } catch (error) {
+                console.log(error)
             }
-            else if (umiTo === abaaTo&&umiTo==="rageeb")
-            {
-                let pay = new Loan(rageebLoan[rageebLoan.length-1].remaining, rageebLoan[rageebLoan.length-1].abaa, rageebLoan[rageebLoan.length-1].umi, rageebLoan[rageebLoan.length-1].UAE, rageebLoan[rageebLoan.length-1].house, rageebLoan[rageebLoan.length-1].swafia, abaaIn, umiIn, abaaSource, umiSource, "rageeb",projectOwner,date1)
-                let store = await storeActionLoan(pay)
-            }
-            else if (umiTo!==abaaTo)
-            {
-                if(umiTo==="omar")
-                {
-                    let pay = new Loan(omarLoan[omarLoan.length-1].remaining, omarLoan[omarLoan.length-1].abaa, omarLoan[omarLoan.length-1].umi, omarLoan[omarLoan.length-1].UAE, omarLoan[omarLoan.length-1].house, omarLoan[omarLoan.length-1].swafia, 0, umiIn, "", umiSource, "omar",projectOwner,date1)
-                   
-                    let store = await storeActionLoan(pay)
-                }
-                else if (umiTo==="rageeb")
-                {
-                    let pay = new Loan(rageebLoan[rageebLoan.length-1].remaining, rageebLoan[rageebLoan.length-1].abaa, rageebLoan[rageebLoan.length-1].umi, rageebLoan[rageebLoan.length-1].UAE, rageebLoan[rageebLoan.length-1].house, rageebLoan[rageebLoan.length-1].swafia, 0, umiIn, "", umiSource, "rageeb",projectOwner,date1)
-                   
-                    let store = await storeActionLoan(pay)
-                }
-                if(abaaTo==="omar")
-                {
-                    let pay = new Loan(omarLoan[omarLoan.length-1].remaining, omarLoan[omarLoan.length-1].abaa, omarLoan[omarLoan.length-1].umi, omarLoan[omarLoan.length-1].UAE, omarLoan[omarLoan.length-1].house, omarLoan[omarLoan.length-1].swafia, abaaIn, 0, abaaSource, "", "omar",projectOwner,date1)
-                   
-                    let store = await storeActionLoan(pay)
-                }
-                else if (abaaTo==="rageeb")
-                {
-                    let pay = new Loan(rageebLoan[rageebLoan.length-1].remaining, rageebLoan[rageebLoan.length-1].abaa, rageebLoan[rageebLoan.length-1].umi, rageebLoan[rageebLoan.length-1].UAE, rageebLoan[rageebLoan.length-1].house, rageebLoan[rageebLoan.length-1].swafia, abaaIn, 0, abaaSource, "", "rageeb",projectOwner,date1)
-                   
-                    let store = await storeActionLoan(pay)
-                }
-            }
-            socket.emit("addedAction","Action has been stored succsufully")
         }
-        catch (error) {
-            console.log(error)
-            socket.emit("addedAction","an error happened while trying to add action")
-        }
+
+        socket.emit("addedAction", "action has been stored")
+        // //get the privous action loans
+        // try {
+        //     let loanACtions = []
+
+        //     loanACtions = await loanAction.find({ loaner:to, project: projectOwner })
+
+
+        //     let loan = new Loan(loanACtions[loanACtions.length - 1].remaining, loanACtions[loanACtions.length - 1].abaa, loanACtions[loanACtions.length - 1].umi, loanACtions[loanACtions.length - 1].UAE, loanACtions[loanACtions.length - 1].house, loanACtions[loanACtions.length - 1].swafia, value, source, to, projectOwner, date1)
+        //     await storeActionLoan(loan)
+
+        //     if (actionType === "cash in") {
+
+        //         console.log("in if ")
+        //         if (giver === "abaa") {
+        //             console.log("in abaa ")
+        //             loanACtions = await loanAction.find({ loaner: "abaa", project: projectOwner })
+        //         }
+        //         else if (giver === "umi") {
+        //             console.log("in umi ")
+        //             loanACtions = await loanAction.find({ loaner: "umi", project: projectOwner })
+        //         }
+        //         let loan = new Loan(loanACtions[loanACtions.length - 1].remaining, loanACtions[loanACtions.length - 1].abaa, loanACtions[loanACtions.length - 1].umi, loanACtions[loanACtions.length - 1].UAE, loanACtions[loanACtions.length - 1].house, loanACtions[loanACtions.length - 1].swafia, value * -1, source, loanACtions[loanACtions.length - 1].loaner, projectOwner, date1, "giver")
+        //         let save = await storeActionLoan(loan)
+        //     }
+
+        //     socket.emit("addedAction", "Action has been stored succsufully")
+        // }
+        // catch (error) {
+        //     console.log(error)
+        //     socket.emit("addedAction", "an error happened while trying to add action")
+        // }
 
 
 
@@ -301,9 +392,9 @@ io.on("connection", (socket) => {
 
     socket.on("getspecificProject", async (name) => {
 
-        let action = {};
+        let action = [];
         try {
-            action = await Action.find({ owner: name })
+            action = await ActionObject.find({ owner: name })
         } catch (err) {
             console.log("there is an error happened")
             return
@@ -326,83 +417,281 @@ io.on("connection", (socket) => {
         }
     });
 
-    socket.on("getLoanAction", async(data) => {
+    socket.on("getLoanAction", async (data) => {
 
-       let loaner=data.loaner
-       let project=data.project
+        let loaner = data.loaner
+        let project = data.project
+        console.log(loaner)
+        console.log(project)
 
-       try{
-        let actions= await loanAction.find({loaner:loaner,project:project})
-        console.log(actions)
-        socket.emit("sendLoanAction",actions)
-       }catch(error){
-        console.log(error)
-       }
+        try {
+            let actions = await loanAction.find({ loaner: loaner, project: project })
+            console.log(actions)
+            socket.emit("sendLoanAction", actions)
+        } catch (error) {
+            console.log(error)
+        }
     })
 
-    socket.on("deleteLastAction", async(project) => {
-        
-        let actions = await Action.find({owner:project});
+    socket.on("deleteLastAction", async (project) => {
+
+        let actions = await ActionObject.find({ owner: project });
         console.log("hey")
+        let source=""
+        let taker=""
+        let to = ""
         if (actions.length > 1) {
             console.log("hey2")
-        let lastAction = actions.pop();
-        console.log("hey3")
-        try{
-            console.log("hey4")
-            await Action.deleteOne({ "actionNumber": lastAction.actionNumber });
-            console.log("hello")
-            socket.emit("sendActions", actions)
-        }catch(error){
-            console.log(error)
+            let lastAction = actions.pop();
+            source= lastAction.source
+            taker=lastAction.taker
+            console.log(lastAction)
+            try {
+
+                await ActionObject.deleteOne({ "actionNumber": lastAction.actionNumber });
+                console.log("hello")
+                socket.emit("sendActions", actions)
+            } catch (error) {
+                console.log("in error 1")
+                console.log(error)
+            }
+            try {
+                
+                    let lastLoanAction = await loanAction.find({ "loaner": lastAction.taker });
+                    if (lastLoanAction) {
+                        await loanAction.deleteOne({ "_id": lastLoanAction[lastLoanAction.length-1]._id });
+                        console.log("before the if")
+                        if(lastLoanAction.length===1)
+                        {
+                            console.log("in the if")
+                            let baseProject=await ProjectObject.findOne({project:project})
+                            delete baseProject.loans[lastAction.taker]
+                            console.log(baseProject.loans)
+                            await ProjectObject.updateOne({ project: project }, { $set: { loans: baseProject.loans } });
+                        }
+                    }
+                    console.log("hello")
+
+                    if (source.startsWith("from")) {
+                        let words = source.split(" "); // Split the string by spaces to get an array of words
+                        to = words[words.length - 1]; // Access the last element of the array
+                        let lastLoanAction = await loanAction.findOne({ "loaner": to }).sort({ _id: -1 });
+                        if (lastLoanAction) {
+                            await loanAction.deleteOne({ "_id": lastLoanAction._id });
+                        }
+                        console.log("hello")
+                      }
+             
+            } catch (error) {
+                console.log("in error 2")
+                console.log(error)
+            }
+
+
         }
-       
-        }
-        
+
     })
 
-    socket.on("editAction", async(data) => {
-        let actionNumber=data["N"]
-        let abaaLoan=data["abaa Loan"]
-        let umiLoan=data["umi Loan"]
-        let abaaIn= data["abaa In"]
-        let umiIn=data["umi In"]
-        let abaaSource =  data["abaa Source"]
-        let umiSource=data["umi Source"]
+    socket.on("editAction", async (data) => {
+        let actionNumber = data["N"]
+        let abaaLoan = data["abaa Loan"]
+        let umiLoan = data["umi Loan"]
+        let abaaIn = data["abaa In"]
+        let umiIn = data["umi In"]
+        let abaaSource = data["abaa Source"]
+        let umiSource = data["umi Source"]
         let rent = data["rent"]
-        let cash= data["cash"]
-        let cashShling= data["cash Shling"]
-        let total= data["total"]
-        let abaaOut= data["abaa Out"]
-        let umiOut= data["umi Out"]
-        let outSource= data["out Source"]
-        let abaaTotal= data["abaa Total"]
-        let umiTotal=data["umi Total"]
-        let remainingAbaa=data["remaining Abaa"]
-        let remainingUmi=data["remaining Umi"]
-        let remainingTotal=data["remaining Total"]
-        let date =data["date"]
-        let projectOwner=data["projectOwner"]
+        let cash = data["cash"]
+        let cashShling = data["cash Shling"]
+        let total = data["total"]
+        let abaaOut = data["abaa Out"]
+        let umiOut = data["umi Out"]
+        let outSource = data["out Source"]
+        let abaaTotal = data["abaa Total"]
+        let umiTotal = data["umi Total"]
+        let remainingAbaa = data["remaining Abaa"]
+        let remainingUmi = data["remaining Umi"]
+        let remainingTotal = data["remaining Parent"]
+        let remainingTotalTotal = data["remaining Total"]
+        let totalTotal = data["total Paid"]
+        let date = data["date"]
+        let projectOwner = data["projectOwner"]
         console.log(actionNumber)
-        let actions={}
-        try{
+        let actions = {}
+        try {
             //get all the actions that bigger than or equal to the curruent action number 
-         actions= await Action.updateOne({owner:projectOwner ,actionNumber:actionNumber},{ $set: { abaaLoan: abaaLoan, umiLoan: umiLoan,abaaIn: abaaIn,umiIn: umiIn,abaaSource: abaaSource,umiSource: umiSource,rent: rent,cash: cash,cashShling: cashShling,total: total,abaaOut: abaaOut,umiOut: umiOut,outSource: outSource,abaaTotal: abaaTotal,umiTotal: umiTotal,remainingAbaa: remainingAbaa,remainingUmi: remainingUmi,remainingTotal: remainingTotal,date,date } })
-       
-        }catch(error){
+            actions = await Action.updateOne({ owner: projectOwner, actionNumber: actionNumber }, { $set: { abaaLoan: abaaLoan, umiLoan: umiLoan, abaaIn: abaaIn, umiIn: umiIn, abaaSource: abaaSource, umiSource: umiSource, rent: rent, cash: cash, cashShling: cashShling, total: total, abaaOut: abaaOut, umiOut: umiOut, outSource: outSource, abaaTotal: abaaTotal, umiTotal: umiTotal, remainingAbaa: remainingAbaa, remainingUmi: remainingUmi, remainingTotalTotal: remainingTotalTotal, totalTotal: totalTotal, remainingTotal: remainingTotal, date, date } })
+
+        } catch (error) {
             console.log(error)
         }
 
-        try{
-            let Actions= await Action.find({owner:projectOwner})
-            socket.emit("sendUpdatedActions",Actions)
-        
-        }catch(error){
+        try {
+            let Actions = await ActionObject.find({ owner: projectOwner })
+            socket.emit("sendUpdatedActions", Actions)
+
+        } catch (error) {
             console.log(error)
         }
-        
+
     })
 
+    //update omar and rageen loan
+    socket.on("changeLoan", async (data) => {
+        let loaner = data.loanerChange
+        let loan = data.Loan
+        let projectOwner = data.projectOwner
+        try {
+            let action = await loanAction.updateOne({ project: projectOwner, loaner: loaner }, { $set: { StartingLoan: loan } }, { sort: { _id: -1 }, limit: 1 })
+        }
+        catch (error) {
+            console.log(error)
+            return
+        }
+
+    })
+
+    socket.on("getTakers", async (data) => {
+        let owner = data.projectOwner
+
+        let projects = await ProjectObject.find({});
+        let result = [];
+
+        for (let i = 0; i < projects.length; i++) {
+            let project = projects[i];
+            let owner = project.project;
+            let loans = project.loans;
+
+            for (let loaner in loans) {
+                result.push(`${owner}/${loaner}`);
+            }
+        }
+        result.push(`other`);
+        console.log(result)
+        socket.emit("sendTakers", { result })
+    })
+
+
+    socket.on("addLoan", async (data) => {
+        console.log("activated")
+        let value = data.value
+        let loaner = data.loaner
+        let type = data.type
+        let projectOwner = data.projectOwner
+        let date = data.date
+        console.log(" the value is " + value)
+
+        let privous = await ProjectObject.findOne({ project: projectOwner })
+
+        if (type === "existed" || privous.loans.hasOwnProperty(loaner)) {
+            console.log("if")
+            let actions = await ActionObject.findOne({ owner: projectOwner }).sort({ _id: -1 }).limit(1);
+            console.log(projectOwner)
+            // Get the loaner's loan amount
+            console.log(" the loaner is "+loaner)
+            let loanAmount = actions.remainingLoans[loaner];
+            // Increase the loan amount by the specified value
+            actions.remainingLoans[loaner] = loanAmount + value;
+            console.log(" the amount  is "+loanAmount)
+            actions.actionType = "add loan"
+            let newAction = new ActionObject({
+                actionNumber: actions.actionNumber + 1,
+                actionType: actions.actionType,
+                owner: actions.owner,
+                loans: actions.loans,
+                value: value,
+                source: "-",
+                taker: loaner,
+                giver: "-",
+                purpose: "-",
+                remainingLoans: actions.remainingLoans,
+                totalPaid: actions.totalPaid,
+                totalRemaining:actions.totalRemaining+value,
+                shlingFactor: actions.shlingFactor,
+                date: date
+            })
+
+
+            // Save the updated actions object in the database
+            await newAction.save();
+
+            let loanActions = await loanAction.findOne({ project: projectOwner, loaner: loaner }).sort({ _id: -1 }).limit(1);
+            //add to the loan action
+            let newLoanAction = new loanAction({
+                project: projectOwner,
+                loaner: loaner,
+                StartingLoan: loanActions.remaining||0,
+                date: date,
+                source: loanActions.source,
+                paid: value * -1,
+                total: loanActions.total,
+                remaining: loanActions.remaining + value,
+            })
+            await newLoanAction.save()
+            socket.emit("severResponse", "loan has been added")
+
+        } else if (type === "new") {
+            console.log("else")
+            //add action
+            let actions = await actionsobject.findOne({ owner: projectOwner }).sort({ _id: -1 }).limit(1);
+
+            // Increase the loan amount by the specified value
+            actions.remainingLoans[loaner] = value;
+            actions.actionType = "add loan"
+            let newAction = new ActionObject({
+                actionNumber: actions.actionNumber + 1,
+                actionType: actions.actionType,
+                owner: actions.owner,
+                loans: actions.loans,
+                value: value,
+                source: "-",
+                taker: loaner,
+                giver: "-",
+                purpose: "-",
+                remainingLoans: actions.remainingLoans,
+                totalPaid: actions.totalPaid,
+                totalRemaining:actions.totalRemaining+value,
+                shlingFactor: actions.shlingFactor,
+                date: date
+            })
+            await newAction.save();
+
+
+            //add to the starting loan
+            let newBaseLoan = new loans({
+                project: projectOwner,
+                loaner: loaner,
+                StartingLoan: value,
+                date: date,
+            })
+            await newBaseLoan.save()
+
+            //add to the project base loan
+            let baseProject = await ProjectObject.findOne({ project: projectOwner })
+            console.log(baseProject)
+            baseProject.loans[loaner] = value;
+            console.log(baseProject)
+            // Save the updated document in the database
+            
+            await ProjectObject.updateOne({ project: projectOwner }, { $set: { loans: baseProject.loans } });
+
+            //add to the loan action
+            let newLoanAction = new loanAction({
+                project: projectOwner,
+                loaner: loaner,
+                StartingLoan: value,
+                date: date,
+                source: { abaa: 0, umi: 0, UAE: 0 },
+                paid: 0,
+                total: 0,
+                remaining: value,
+            })
+            await newLoanAction.save()
+            let loaners = await ProjectObject.find({ project: projectOwner })
+            socket.emit("sendLoanersedit", { loaners })
+            socket.emit("severResponse", "loan has been added")
+        }
+    })
 
     //socket on client disconnect
     socket.on("disconnect", () => {
@@ -434,31 +723,30 @@ async function getfactor() {
 async function startAction(data) {
     console.log("got the emit")
     let date = data.date;
-    let abaa = data.abaa
-    let umi = data.umi
+    let loans = data.loans
+    console.log(" loans are  " + loans)
+    let totalproject = 0
+    for (let loaner in loans) {
+        totalproject += loans[loaner]
+    }
+
+    console.log("the total loan is " + totalproject)
     let project = data.project
     console.log("starting action")
 
-    let newAction = new Action({
+    let newAction = new ActionObject({
         actionNumber: 1,
+        actionType: "create",
         owner: project,
-        abaaLoan: abaa,
-        umiLoan: umi,
-        abaaIn: 0,
-        umiIn: 0,
-        rent: 0,
-        cash: 0,
-        cashShling: 0,
-        abaaLoneDecrease: 0,
-        umiLoneDecrease: 0,
-        total: 0,
-        abaaOut: 0,
-        umiOut: 0,
-        abaaTotal: 0,
-        umiTotal: 0,
-        remainingAbaa: abaa,
-        remainingUmi: umi,
-        remainingTotal: abaa + umi,
+        loans: loans,
+        value: 0,
+        giver: "-",
+        source: "-",
+        taker: "-",
+        purpose: "-",
+        remainingLoans: loans,
+        totalPaid: 0,
+        totalRemaining: totalproject,
         shlingFactor: 0,
         date: date
     });
@@ -467,33 +755,27 @@ async function startAction(data) {
 }
 
 async function startLoan(data) {
-    console.log("got the emit")
     let date = data.date;
-    let omar = data.omar
-    let rageeb = data.rageeb
+    let loanss = data.loans
     let project = data.project
 
-    let rageebLoan = new loans({
-        project: project,
-        StartingLoan: rageeb,
-        loaner: "rageeb",
-        date: date,
-    });
-    let omarLoan = new loans({
-        project: project,
-        loaner: "omar",
-        StartingLoan: omar,
-        date: date,
-    });
-    let save = await rageebLoan.save()
-    save = await omarLoan.save()
+    for (let loaner in loanss) {
 
-    await StartLoanAction({ date, loaner: "omar", startLoan: omar, project })
-    await StartLoanAction({ date, loaner: "rageeb", startLoan: rageeb, project })
+        let newLoan = new loans({
+            project: project,
+            StartingLoan: loanss[loaner],
+            loaner: `${loaner}`,
+            date: date,
+        })
+        await newLoan.save()
+        await StartLoanAction({ date, loaner: `${loaner}`, startLoan: loanss[loaner], project })
+    }
+
 
 }
 
 async function StartLoanAction(data) {
+    console.log("in function")
     let date = data.date;
     let loaner = data.loaner
     let startingLoan = data.startLoan
@@ -519,46 +801,34 @@ async function StartLoanAction(data) {
         loaner: loaner,
         date: date,
         StartingLoan: startingLoan,
-        umi: umi,
         paid: 0,
-        abaa: abaa,
-        house: house,
-        UAE: UAE,
-        swafia: swafia,
-        total: 0,
-        remaining: startingLoan
+        remaining: startingLoan,
+        source: { abaa: abaa, umi: umi, UAE: UAE, total: 0 },
+
     })
     let save = await newLoanAction.save()
 }
 
-async function  storeActionLoan(pay)
-{
+async function storeActionLoan(pay) {
     console.log("in saving")
-    console.log("from function abaasource is "+ pay.Pay1Source+" and umiSource is "+pay.Pay2Source)
-    let done = await pay.calculateRemaining(pay.Pay1,pay.Pay2,pay.Pay1Source,pay.Pay2Source,pay.totalAbaa,pay.totalUmi,pay.totalUAE,pay.totalhouse,pay.totalSwafia)
+    console.log(pay)
+    await pay.calculateRemaining()
     let newLoanAction = new loanAction({
         project: pay.projectOwner,
         loaner: pay.loaner,
-        date:pay.date,
+        date: pay.date,
         StartingLoan: pay.originalLoan,
-        umi: pay.totalUmi,
-        paid: pay.totalPay,
-        abaa: pay.totalAbaa,
-        house: pay.totalhouse,
-        UAE: pay.totalUAE,
-        swafia: pay.totalSwafia,
+        paid: pay.value,
+        source: pay.sources,
         total: pay.total,
         remaining: pay.remaining
     })
 
-    try
-    {
+    try {
         let save = await newLoanAction.save()
     }
-    catch(error )
-    {
+    catch (error) {
         console.log(error)
     }
     return true
 }
-   

@@ -3,23 +3,17 @@ let projectSchema = new mongoose.Schema({
     actionNumber: Number,
     actionType: String,
     owner: String,
-    abaaLoan: Number, 
-    umiLoan: Number,
-    omarLoan:Number,
-    rageebLoan:Number,
+    loans:Object,
     value: Number,
     source:String,
     taker:String,
     giver: String,
     purpose: String,
-    remainingAbaa: Number,
-    remainingUmi: Number, 
-    remainingOmar: Number,
-    remainingRageeb: Number,  
-    remainingTotal: Number, 
+    remainingLoans:Object,
     totalPaid: Number, 
+    totalRemaining:Number,
     shlingFactor: Number,
     date: String
 });
 
-module.exports = mongoose.model("Action", projectSchema);
+module.exports = mongoose.model("ActionObject", projectSchema);

@@ -2,7 +2,7 @@
 
 <head>
     <script src="/socket.io/socket.io.js"></script>
-    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/statment.css">
 </head>
 
 <body>
@@ -78,27 +78,27 @@
                     <input type="number" id="abaaLoan" required> <i>Abaa starting loan</i>
 
                 </div>
+
                 <div class="inputBox">
-
                     <input type="number" id="rageebLoan" required> <i>Rageeb starting loan</i>
-
                 </div>
+
                 <div class="inputBox">
 
                     <input type="number" id="omarLoan" required> <i>khal omar starting loan</i>
 
                 </div>
-                <button id="Submit">Submit</button>
+
 
 
             </form>
-
+            <button id="add" style="display: none;">Add new loaner</button>
+            <button id="Submit" style="display: none;">Submit</button>
             <form action="" id="form2" style="display: none;">
-                <div class="inputBox">
 
-                    <input type="text" id="projectName2" required> <i>Project name</i>
 
-                </div>
+                <div id="choice"></div>
+
                 <button id="Submit2">Submit</button>
 
             </form>
@@ -125,62 +125,92 @@
         //display forms
         document.getElementById("create").addEventListener("click", () => {
             document.getElementById("form").style.display = "flex";
+            document.getElementById("Submit").style.display = "block";
+            document.getElementById("add").style.display = "block";
             document.getElementById("form2").style.display = "none";
             console.log("hi")
         })
         document.getElementById("delete").addEventListener("click", () => {
             document.getElementById("form2").style.display = "flex";
+            document.getElementById("Submit").style.display = "none";
+            document.getElementById("add").style.display = "none";
             document.getElementById("form").style.display = "none";
 
             console.log("hi")
         })
 
+        socket.emit("getProjects")
+        socket.on("sendProjects", (projects) => {
 
+            project = projects;
+            console.log('sending projects');
+            let selectElement = document.createElement("select");
+            selectElement.setAttribute("id", "projectSelect");
 
+            for (let i = 0; i < projects.length; i++) {
+                let optionElement = document.createElement("option");
+                optionElement.textContent = projects[i].project;
+                selectElement.appendChild(optionElement);
+            }
 
+            let choiceDiv = document.getElementById("choice");
+            choiceDiv.innerHTML = "";
+            choiceDiv.appendChild(selectElement);
+        });
+
+        let check=true
         //getting the values
         document.getElementById("Submit").addEventListener("click", () => {
+            event.preventDefault();
 
-            event.preventDefault()
-            let abaaLoan = 0
-            let umiLoan = 0
-            let rageebLoan = 0
-            let omarLoan = 0
-            let projectname = ""
-            let date = ""
+            // Get the values of the static input fields
+            const loans = {
+                abaa: parseInt(document.getElementById("abaaLoan").value) || 0,
+                umi: parseInt(document.getElementById("aishaLoan").value) || 0,
+                rageeb: parseInt(document.getElementById("rageebLoan").value) || 0,
+                omar: parseInt(document.getElementById("omarLoan").value) || 0,
+            };
+            let projectname = document.getElementById("projectName").value || "";
+            let date = document.getElementById("date").value || "";
 
+            // Loop through all the dynamically added input elements
+            const dynamicLoaners = [];
+           
+            const dynamicInputElements = document.querySelectorAll('input:not([type="submit"]):not([type="text"]):not([id^="aisha"]):not([id^="abaa"]):not([id^="rageeb"]):not([id^="omar"]):not([type="date"])');
+            dynamicInputElements.forEach((inputElement) => {
+                const parentElement = inputElement.parentElement;
+                const loanerName = parentElement.previousElementSibling.querySelector('input[type="text"]');
+                let words = loanerName.value.split(" "); // Split the string by spaces to get 
+                if(words.length>1){
+                    check=false
+                    console.log("loaner connot have space")
+                    alert("loaner name connot have space")
+                    return
+                }
+                const loanAmount = parseInt(inputElement.value.trim()) || 0;
+                if (loanerName) {
+                    dynamicLoaners.push({
+                        name: loanerName.value.trim().toLowerCase(),
+                        loan: loanAmount,
+                    });
+                    if (loans[loanerName.value.trim().toLowerCase()]) {
+                        loans[loanerName.value.trim().toLowerCase()] += loanAmount;
+                    } else {
+                        loans[loanerName.value.trim().toLowerCase()] = loanAmount;
+                    }
+                }
+            });
 
-            let abaa = document.getElementById("abaaLoan").value
-            let umi = document.getElementById("aishaLoan").value
-            let rageeb = document.getElementById("rageebLoan").value
-            let omar = document.getElementById("omarLoan").value
-            let project = document.getElementById("projectName").value
-            let datee = document.getElementById("date").value
+            // Print the collected data in the console
+            console.log({
+                loans,
+                projectname,
+                date,
+                dynamicLoaners,
+            });
 
-            if (abaa !== null && abaa !== "")
-                abaaLoan = parseInt(abaa)
-            if (umi !== null && umi !== "")
-                umiLoan = parseInt(umi)
-            if (rageeb !== null && rageeb !== "")
-                rageebLoan = parseInt(rageeb)
-            if (omar !== null && omar !== "")
-                omarLoan = parseInt(omar)
-            if (project != null)
-                projectname = project
-            else {
-                alert("project name cannot be empty")
-                return;
-            }
-            if (datee != null)
-                date = datee
-            else {
-                alert("date cannot be empty")
-                return;
-            }
-
-
-            console.log(umiLoan)
-            socket.emit("storeProject", { abaaLoan, umiLoan, projectname, date,rageebLoan ,omarLoan})
+            if(check)
+            socket.emit("storeProject", { loans,projectname, date  })
             socket.once("projectRespones", (message) => {
 
                 alert(message)
@@ -192,25 +222,68 @@
         document.getElementById("Submit2").addEventListener("click", () => {
             event.preventDefault();
 
-            let project = ""
-            if (document.getElementById("projectName2").value == null) {
-                alert("project name connot be empty")
-                return
+            let project = "";
+            if (document.getElementById("projectSelect").value == null) {
+                alert("project name cannot be empty");
+                return;
+            } else {
+                project = document.getElementById("projectSelect").value;
             }
 
-            else
-                project = document.getElementById("projectName2").value
+            // Show a confirmation dialog
+            let confirmed = confirm(`Are you sure you want to remove the project "${project}"?`);
 
-            socket.emit("removeProject", project)
-            socket.once("projectRespones", (message) => {
+            if (confirmed) {
+                socket.emit("removeProject", project);
+                socket.once("projectRespones", (message) => {
+                    alert(message);
+                    return;
+                });
+            } else {
+                console.log("User cancelled project removal");
+            }
+        });
 
-                alert(message)
-                return
-            })
 
-        })
+    </script>
+
+    <script>
 
 
+
+        document.getElementById("add").addEventListener("click", () => {
+            event.preventDefault();
+
+            // Get a reference to the parent element
+            const parentElement = document.getElementById("form");
+
+            // Create a new div element
+            const newDiv = document.createElement("div");
+
+            // Set the class attribute of the new div
+            newDiv.setAttribute("class", "inputBox");
+
+
+            // Set the inner HTML of the name div
+            newDiv.innerHTML = `<input type="text" id="name" required> <i>the name of the loaner</i>`;
+
+            // Create a new div element
+            const newDiv2 = document.createElement("div");
+
+            // Set the class attribute of the new div
+            newDiv2.setAttribute("class", "inputBox");
+
+
+            // Set the inner HTML of the name div
+            newDiv2.innerHTML = `<input type="number" id="amount" required> <i>Loan amount</i>`;
+
+            // Append the new div as a child of the parent element
+            parentElement.appendChild(newDiv);
+
+
+            // Append the new div as a child of the parent element
+            parentElement.appendChild(newDiv2);
+        });
     </script>
 </body>
 

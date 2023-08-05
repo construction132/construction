@@ -23,7 +23,6 @@ form{
   display: flex;
   justify-content: space-between;
   width: 450px;
-  flex-wrap: wrap;
 }
 .inputbtn label
 {
@@ -330,6 +329,7 @@ input[type="submit"]:active
 {
   opacity: 0.6;
 }
+
 @media (max-width: 900px)
 {
   section span 
@@ -346,3 +346,4 @@ input[type="submit"]:active
     height: calc(20vw - 2px);
   }
 }
+
